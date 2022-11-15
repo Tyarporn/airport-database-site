@@ -1,25 +1,47 @@
 <html>
+
 <head>
 </head>
+
 <body>
-<form action="/post" method="POST">
+	<br>
 	<h1>Welcome to the Flight Database!</h1>
-	<input type="text" name = "input" placeholder="Departure" required/> </br>
-	<input type="text" name = "input" placeholder="Arrival" required/> </br>
-	<input type="text" name = "input" placeholder="Departure Date" required/> </br>
-	<input type="checkbox" id="one-way" name = "One Way" >
-		<label for="one-way"> One Way?</label><br>
-	<input type="text" name = "input" placeholder="Arrival Date (ONLY IF ONE WAY)" required/> </br>
-	<input type="submit" value = Search />
-</form>
+	<a href="/customer_login">Customer login</a> </br>
+	<a href="/staff_login">Staff login</a>
+	<form action="/post" method="POST">
 
-<style type="text/css">
-	table, th, td{
-		border: 1px solid black;
-	}
-</style>
+		<h2>View public information</h2>
+		<input type="text"  placeholder="Departure" required />
+		<input type="text" placeholder="Arrival" required /> </br>
+		<input type="text" placeholder="Departure Date" required /> </br>
+		<input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
+		<label for="one-way"> Round Trip?</label><br>
+		<input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> </br>
+			<br>
+		<input type="submit" value=Search />
+	</form>
 
-<!-- <table>
+
+
+	<script>
+	  function toggleArriveDate() {
+	    if (document.getElementById("arrive_date").style.visibility == "hidden") {
+	      document.getElementById("arrive_date").style.visibility = "visible";
+	    } else {
+	      document.getElementById("arrive_date").style.visibility = "hidden";
+	    }
+	  }
+	</script>
+
+	<style type="text/css">
+		table,
+		th,
+		td {
+			border: 1px solid black;
+		}
+	</style>
+
+	<!-- <table>
 	<th>Time</th>
 	<th>Post</th>
 
@@ -31,7 +53,7 @@
 {% endfor %}
 </table> -->
 
-<a href="/logout">Logout</a>
+	<a href="/logout">Logout</a>
 
 </body>
 
