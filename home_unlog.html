@@ -5,9 +5,12 @@
 
 <body>
 	<br>
+
+	<p><a href="/customer_login">Customer login</a> <a href="/staff_login">Staff login</a></p>
+	<style>
+		p{text-align: right;}
+	</style>
 	<h1>Welcome to the Flight Database!</h1>
-	<a href="/customer_login">Customer login</a> </br>
-	<a href="/staff_login">Staff login</a>
 	<form action="/post" method="POST">
 
 		<h2>View public information</h2>
@@ -41,17 +44,30 @@
 		}
 	</style>
 
-	<!-- <table>
-	<th>Time</th>
-	<th>Post</th>
+	<table>
+	<th>Airline</th>
+	<th>Flight Number</th>
+	<th>Depart Date</th>
+	<th>Depart Time </th>
+	<th>Arrival Date </th>
+	<th>Arrival Time </th>
+	<th>Flight Status</th>
+	<th>Price</th>
+
 
 {% for line in posts %}
 	<tr>
-		<td>{{line['ts']}}</td>
-		<td>{{line['blog_post']}}</td>
+		<td>{{line['airline_name']}}</td>
+		<td>{{line['flight_number']}}</td>
+		<td>{{line['departure_date']}}</td>
+		<td>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}</td>
+		<td>{{line['arrival_time']}}</td>
+		<td>{{line['flight_status']}}</td>
+		<td>{{line['price']}}</td>
 	</tr>
 {% endfor %}
-</table> -->
+</table>
 
 	<a href="/logout">Logout</a>
 
