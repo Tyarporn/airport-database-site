@@ -7,13 +7,21 @@ import pymysql.cursors
 app = Flask(__name__)
 
 #Configure MySQL
+# conn = pymysql.connect(host='localhost',
+#                        user='root',
+#                        password='',
+#                        db='air_ticket_reservation_system',
+#                        charset='utf8mb4',
+#                        cursorclass=pymysql.cursors.DictCursor)
+
+# Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='',
-                       db='air_ticket_reservation_system',
+                       password='root',
+                       port= 8889,
+                       db='Air Ticket Reservation System',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
-
 #Define a route to hello function
 @app.route('/')
 def hello():
@@ -28,6 +36,16 @@ def customer_login():
 @app.route('/staff_login')
 def staff_login():
     return render_template('staff_login.html')
+
+#Define route for customer register
+@app.route('/customer_register')
+def customer_register():
+    return render_template('customer_register.html')
+
+#Define route for customer register
+@app.route('/staff_register')
+def staff_register():
+    return render_template('staff_register.html')
 
 #Define route for register
 @app.route('/register')
@@ -59,7 +77,7 @@ def loginAuth():
         #returns an error message to the html page
         error = 'Invalid login or username'
         return render_template('customer_login.html', error=error)
-        
+
 #Authenticates the staff login
 @app.route('/staffLoginAuth', methods=['GET', 'POST'])
 def staffLoginAuth():
@@ -125,7 +143,7 @@ def home_unlog():
     cursor.close()
     return render_template('home_unlog.html', username=username, posts=data1)
 
-        
+
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     username = session['username']
@@ -141,7 +159,7 @@ def post():
 def logout():
     session.pop('username')
     return redirect('/')
-        
+
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask

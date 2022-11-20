@@ -1,0 +1,37 @@
+<html>
+
+<head>
+</head>
+
+<body>
+<h1> Register Customer Account</h1>
+<form action="/registerCustomerAuth" method="POST">
+	<h3> Personal information </h3>
+	<input type="text" name = "first_name" placeholder="First Name" required/> </br>
+	<input type="text" name = "last_name" placeholder="Last Name" required/> </br>
+	<input type="date" name = "Date of Birth" placeholder="Date of Birth" required/></br>
+	<input type="text" name = "Phone Number" placeholder="phone_number" required/></br>
+	<input type="text" name = "email" placeholder="Email" required/> </br>
+	<input type="password" name = "password" placeholder="Password" required/></br>
+
+	<h3> Please input your address </h3>
+	<input type="text" name = "building_number" placeholder="Building Number" required/>
+	<input type="text" name = "street" placeholder="Street" required/>
+	<input type="text" name = "city" placeholder="City" required/>
+	<input type="text" name = "state" placeholder="State" required/>
+
+	<h3> Please input your passport information </h3>
+	<input type="text" name = "passport_number" placeholder="Passport Number" required/>
+	<input type="date" name = "passport_expiration" placeholder="Passport Expiration Date" required/>
+  <input type="text" name = "passport_country" placeholder="Passport Country" required/></br>
+
+	<input type="submit" value = Register /></br>
+
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+<a href="/">Go back</a>
+</body>
+
+</html>
