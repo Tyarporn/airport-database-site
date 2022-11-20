@@ -17,12 +17,12 @@ conn = pymysql.connect(host='localhost',
 #Define a route to hello function
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    return render_template('home_unlog.html')
 
 #Define route for login
-@app.route('/login')
-def login():
-    return render_template('login.html')
+@app.route('/customer_login')
+def customer_login():
+    return render_template('customer_login.html')
 
 #Define route for register
 @app.route('/register')
@@ -36,11 +36,10 @@ def loginAuth():
     username = request.form['username']
     password = request.form['password']
     check = request.form['checkbox']
-    print(check)
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM user WHERE username = %s and password = %s'
+    query = 'SELECT email, password FROM Customer WHERE email = %s and password = %s'
     cursor.execute(query, (username, password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -55,7 +54,7 @@ def loginAuth():
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
-        return render_template('login.html', error=error)
+        return render_template('home_unlog.html', error=error)
 
 #Authenticates the register
 @app.route('/registerAuth', methods=['GET', 'POST'])
@@ -84,8 +83,8 @@ def registerAuth():
         cursor.close()
         return render_template('index.html')
 
-@app.route('/home')
-def home():
+@app.route('/home_unlog')
+def home_unlog():
     
     username = session['username']
     cursor = conn.cursor();
