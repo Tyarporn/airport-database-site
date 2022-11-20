@@ -4,71 +4,93 @@
 </head>
 
 <body>
-	<br>
-
-	<p>Welcome! {customer}</p>
+  <style type="text/css">
+    table,
+    th,
+    td {
+      border: 1px solid black;
+    }
+  </style>
+  <br>
   <a href="/logout">Logout</a>
   <a href="/remove_account">Remove Account</a>
-	<h1>Welcome to the Flight Database!</h1>
-	<form action="/post" method="POST">
+  <h1>Welcome to the Flight Database, {{first_name}}!</h1>
 
-		<h2>View your flights</h2>
-		<input type="text"  placeholder="Departure" required />
-		<input type="text" placeholder="Arrival" required /> </br>
-		<input type="text" placeholder="Departure Date" required /> </br>
-		<input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
-		<label for="one-way"> Round Trip?</label><br>
-		<input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> </br>
-			<br>
-		<input type="submit" value=Search />
-	</form>
-
-
-
-	<script>
-	  function toggleArriveDate() {
-	    if (document.getElementById("arrive_date").style.visibility == "hidden") {
-	      document.getElementById("arrive_date").style.visibility = "visible";
-	    } else {
-	      document.getElementById("arrive_date").style.visibility = "hidden";
-	    }
-	  }
-	</script>
-
-	<style type="text/css">
-		table,
-		th,
-		td {
-			border: 1px solid black;
-		}
-	</style>
-
-	<table>
-	<th>Airline</th>
-	<th>Flight Number</th>
-	<th>Depart Date</th>
-	<th>Depart Time </th>
-	<th>Arrival Date </th>
-	<th>Arrival Time </th>
-	<th>Flight Status</th>
-	<th>Price</th>
+  <form action="/post" method="POST">
+    <h2>Search for flights</h2>
+    <input type="text" placeholder="Departure" required />
+    <input type="text" placeholder="Arrival" required /> </br>
+    <input type="text" placeholder="Departure Date" required /> </br>
+    <input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
+    <label for="one-way"> Round Trip?</label><br>
+    <input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> </br>
+    <br>
+    <input type="submit" value=Search />
+  </form>
+  <table>
+    <th>Airline</th>
+    <th>Flight Number</th>
+    <th>Depart Date</th>
+    <th>Depart Time </th>
+    <th>Arrival Date </th>
+    <th>Arrival Time </th>
+    <th>Flight Status</th>
+    <th>Price</th>
 
 
-{% for line in posts %}
-	<tr>
-		<td>{{line['airline_name']}}</td>
-		<td>{{line['flight_number']}}</td>
-		<td>{{line['departure_date']}}</td>
-		<td>{{line['departure_time']}}</td>
-		<td>{{line['arrival_date']}}</td>
-		<td>{{line['arrival_time']}}</td>
-		<td>{{line['flight_status']}}</td>
-		<td>{{line['price']}}</td>
-	</tr>
-{% endfor %}
-</table>
+    {% for line in flights %}
+    <tr>
+      <td>{{line['airline_name']}}</td>
+      <td>{{line['flight_number']}}</td>
+      <td>{{line['departure_date']}}</td>
+      <td>{{line['departure_time']}}</td>
+      <td>{{line['arrival_date']}}</td>
+      <td>{{line['arrival_time']}}</td>
+      <td>{{line['flight_status']}}</td>
+      <td>{{line['price']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 
-	<a href="/logout">Logout</a>
+  <h2>View your flights</h2>
+  <style type="text/css">
+    table,
+    th,
+    td {
+      border: 1px solid black;
+    }
+  </style>
+  <table>
+    <th>Airline</th>
+    <th>Flight Number</th>
+    <th>Depart Date</th>
+    <th>Depart Time </th>
+    <th>Arrival Date </th>
+    <th>Arrival Time </th>
+    <th>Flight Status</th>
+    <th>Price</th>
+
+
+    {% for line in flights %}
+    <tr>
+      <td>{{line['airline_name']}}</td>
+      <td>{{line['flight_number']}}</td>
+      <td>{{line['departure_date']}}</td>
+      <td>{{line['departure_time']}}</td>
+      <td>{{line['arrival_date']}}</td>
+      <td>{{line['arrival_time']}}</td>
+      <td>{{line['flight_status']}}</td>
+      <td>{{line['price']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+
+
+
+
+
+  <a href="/logout">Logout</a>
 
 </body>
 
