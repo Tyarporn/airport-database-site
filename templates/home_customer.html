@@ -11,10 +11,20 @@
       border: 1px solid black;
     }
   </style>
+  <script>
+    function toggleArriveDate() {
+      if (document.getElementById("arrive_date").style.visibility == "hidden") {
+        document.getElementById("arrive_date").style.visibility = "visible";
+      } else {
+        document.getElementById("arrive_date").style.visibility = "hidden";
+      }
+    }
+  </script>
   <br>
+  <a href="/track_spending">Track my spending</a>
   <a href="/logout">Logout</a>
   <a href="/remove_account">Remove Account</a>
-  <h1>Welcome to the Flight Database, {{first_name}}!</h1>
+  <h1>Welcome to your Flight Database, {{first_name}}!</h1>
 
   <form action="/post" method="POST">
     <h2>Search for flights</h2>
@@ -36,6 +46,7 @@
     <th>Arrival Time </th>
     <th>Flight Status</th>
     <th>Price</th>
+    <th>Buy</th>
 
 
     {% for line in flights %}
@@ -48,6 +59,7 @@
       <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
       <td>{{line['price']}}</td>
+      <td><a href="/buy">Purchase flight</a></td>
     </tr>
     {% endfor %}
   </table>
@@ -69,6 +81,7 @@
     <th>Arrival Time </th>
     <th>Flight Status</th>
     <th>Price</th>
+    <th>Cancel</th>
 
 
     {% for line in flights %}
@@ -81,16 +94,29 @@
       <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
       <td>{{line['price']}}</td>
+      <td><a href="/cancel">Cancel flight</a></td>
     </tr>
     {% endfor %}
   </table>
 
+  <h2>Previous Flights</h2>
+  <table>
+    <th>Airline</th>
+    <th>Flight Number</th>
+    <th>Depart Date</th>
+    <th>Depart Time </th>
+    <th>Review</th>
 
-
-
-
-
-  <a href="/logout">Logout</a>
+    {% for line in flights %}
+    <tr>
+      <td>{{line['airline_name']}}</td>
+      <td>{{line['flight_number']}}</td>
+      <td>{{line['departure_date']}}</td>
+      <td>{{line['departure_time']}}</td>
+      <td><a href="/review">Review this flight</a></td>
+    </tr>
+    {% endfor %}
+  </table>
 
 </body>
 
