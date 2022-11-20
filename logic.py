@@ -19,27 +19,57 @@ conn = pymysql.connect(host='localhost',
 def hello():
     return render_template('home_unlog.html')
 
-#Define route for login
+#Define route for customer login
 @app.route('/customer_login')
 def customer_login():
     return render_template('customer_login.html')
+
+#Define route for staff login
+@app.route('/staff_login')
+def staff_login():
+    return render_template('staff_login.html')
 
 #Define route for register
 @app.route('/register')
 def register():
     return render_template('register.html')
 
-#Authenticates the login
+#Authenticates the customer login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     #grabs information from the forms
-    username = request.form['username']
+    email = request.form['username']
     password = request.form['password']
-    check = request.form['checkbox']
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
     query = 'SELECT email, password FROM Customer WHERE email = %s and password = %s'
+    cursor.execute(query, (email, password))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if(data):
+        #creates a session for the the user
+        #session is a built in
+        session['username'] = email
+        return redirect(url_for('/'))
+    else:
+        #returns an error message to the html page
+        error = 'Invalid login or username'
+        return render_template('customer_login.html', error=error)
+        
+#Authenticates the staff login
+@app.route('/staffLoginAuth', methods=['GET', 'POST'])
+def staffLoginAuth():
+    #grabs information from the forms
+    username = request.form['username']
+    password = request.form['password']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT username, password FROM Airline_Staff WHERE username = %s and password = %s'
     cursor.execute(query, (username, password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -50,7 +80,7 @@ def loginAuth():
         #creates a session for the the user
         #session is a built in
         session['username'] = username
-        return redirect(url_for('home'))
+        return redirect(url_for('/'))
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
@@ -85,7 +115,6 @@ def registerAuth():
 
 @app.route('/home_unlog')
 def home_unlog():
-    
     username = session['username']
     cursor = conn.cursor();
     query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
@@ -94,7 +123,7 @@ def home_unlog():
     for each in data1:
         print(each['blog_post'])
     cursor.close()
-    return render_template('home.html', username=username, posts=data1)
+    return render_template('home_unlog.html', username=username, posts=data1)
 
         
 @app.route('/post', methods=['GET', 'POST'])
