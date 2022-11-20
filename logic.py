@@ -54,7 +54,7 @@ def loginAuth():
         #creates a session for the the user
         #session is a built in
         session['username'] = email
-        return redirect(url_for('/'))
+        return redirect(url_for('home_customer'))
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
@@ -80,11 +80,11 @@ def staffLoginAuth():
         #creates a session for the the user
         #session is a built in
         session['username'] = username
-        return redirect(url_for('/'))
+        return redirect(url_for('home_unlog'))
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
-        return render_template('home_unlog.html', error=error)
+        return render_template('staff_login.html', error=error)
 
 #Authenticates the register
 @app.route('/registerAuth', methods=['GET', 'POST'])
@@ -115,15 +115,11 @@ def registerAuth():
 
 @app.route('/home_unlog')
 def home_unlog():
-    username = session['username']
-    cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall()
-    for each in data1:
-        print(each['blog_post'])
-    cursor.close()
-    return render_template('home_unlog.html', username=username, posts=data1)
+    return render_template('home_unlog.html')
+    
+@app.route('/home_customer')
+def home_customer():
+    return render_template('home_customer.html')
 
         
 @app.route('/post', methods=['GET', 'POST'])
