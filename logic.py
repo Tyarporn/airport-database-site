@@ -7,14 +7,15 @@ import pymysql.cursors
 app = Flask(__name__)
 
 #Configure MySQL
-# conn = pymysql.connect(host='localhost',
-#                        user='root',
-#                        password='',
-#                        db='air_ticket_reservation_system',
-#                        charset='utf8mb4',
-#                        cursorclass=pymysql.cursors.DictCursor)
+ conn = pymysql.connect(host='localhost',
+                        user='root',
+                        password='',
+                        db='air_ticket_reservation_system',
+                        charset='utf8mb4',
+                        cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
+"""
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='root',
@@ -22,6 +23,7 @@ conn = pymysql.connect(host='localhost',
                        db='Air Ticket Reservation System',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
+"""
 #Define a route to hello function
 @app.route('/')
 def hello():
