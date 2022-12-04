@@ -7,15 +7,15 @@ import pymysql.cursors
 app = Flask(__name__)
 
 #Configure MySQL
- conn = pymysql.connect(host='localhost',
-                        user='root',
-                        password='',
-                        db='air_ticket_reservation_system',
-                        charset='utf8mb4',
-                        cursorclass=pymysql.cursors.DictCursor)
+ # conn = pymysql.connect(host='localhost',
+ #                        user='root',
+ #                        password='',
+ #                        db='air_ticket_reservation_system',
+ #                        charset='utf8mb4',
+ #                        cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
-"""
+
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='root',
@@ -23,7 +23,7 @@ conn = pymysql.connect(host='localhost',
                        db='Air Ticket Reservation System',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
-"""
+
 #Define a route to hello function
 @app.route('/')
 def hello():
@@ -58,7 +58,7 @@ def register():
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     #grabs information from the forms
-    email = request.form['username']
+    email = request.form['email']
     password = request.form['password']
     #cursor used to send queries
     cursor = conn.cursor()
@@ -73,7 +73,7 @@ def loginAuth():
     if(data):
         #creates a session for the the user
         #session is a built in
-        session['username'] = email
+        session['email'] = email
         return redirect(url_for('home_customer'))
     else:
         #returns an error message to the html page
@@ -107,17 +107,28 @@ def staffLoginAuth():
         return render_template('staff_login.html', error=error)
 
 #Authenticates the register
-@app.route('/registerAuth', methods=['GET', 'POST'])
+@app.route('/registerCustomer', methods=['GET', 'POST'])
 def registerAuth():
     #grabs information from the forms
-    username = request.form['username']
-    password = request.form['password']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    email = request.form['email']
+    password = request.form['password']  # STRAIGHT UP STORING PASSWORD. CHANGE LATER!!!!
+    building_number = request.form['building_number']
+    street = request.form['street']
+    city = request.form['city']
+    state = request.form['state']
+    phone_number = request.form['phone_number']
+    passport_number = request.form['passport_number']
+    passport_expiration = request.form['passport_expiration']
+    passport_country = request.form['passport_country']
+    date_of_birth = request.form['date_of_birth']
 
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM user WHERE username = %s'
-    cursor.execute(query, (username))
+    query = 'SELECT * FROM Customer WHERE first_name = %s AND last_name = %s AND phone_number = %s'
+    cursor.execute(query, (first_name, last_name, phone_number))
     #stores the results in a variable
     data = cursor.fetchone()
     #use fetchall() if you are expecting more than 1 data row
@@ -127,16 +138,20 @@ def registerAuth():
         error = "This user already exists"
         return render_template('register.html', error = error)
     else:
-        ins = 'INSERT INTO user VALUES(%s, %s)'
-        cursor.execute(ins, (username, password))
+        ins = """INSERT INTO Customer (first_name, last_name, email, password,
+                building_number, street, city, state, phone_number,
+                passport_number,passport_expiration, passport_country,
+                date_of_birth)VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(ins, (first_name, last_name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
         conn.commit()
         cursor.close()
-        return render_template('index.html')
+        return render_template('customer_login.html')
 
 @app.route('/home_unlog')
 def home_unlog():
     return render_template('home_unlog.html')
-    
+
 @app.route('/home_customer')
 def home_customer():
     return render_template('home_customer.html')

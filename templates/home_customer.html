@@ -21,19 +21,20 @@
     }
   </script>
   <br>
-  <a href="/track_spending">Track My Spending</a>
-  <a href="/logout">Logout</a>
+  <p>Logged in as {{session['email']}} </p>
+  <a href="/track_spending">Track My Spending</a> <br>
+  <a href="/home_unlog">Logout</a>
   <a href="/remove_account">Remove Account</a>
-  <h1>Welcome to your Flight Database, {{first_name}}!</h1>
+  <h1>Welcome to your Flight Database!</h1>
 
   <form action="/post" method="POST">
     <h2>Search for flights</h2>
     <input type="text" placeholder="Departure" required />
-    <input type="text" placeholder="Arrival" required /> </br>
-    <input type="text" placeholder="Departure Date" required /> </br>
+    <input type="text" placeholder="Arrival" required /> <br>
+    <input type="text" placeholder="Departure Date" required /> <br>
     <input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
     <label for="one-way"> Round Trip?</label><br>
-    <input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> </br>
+    <input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> <br>
     <br>
     <input type="submit" value=Search />
   </form>
