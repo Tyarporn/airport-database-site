@@ -63,10 +63,12 @@ def loginAuth():
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT email, password FROM Customer WHERE email = %s and password = %s'
+    query = 'SELECT email, password, first_name FROM Customer WHERE email = %s and password = %s'
     cursor.execute(query, (email, password))
     #stores the results in a variable
     data = cursor.fetchone()
+    print(data)
+    first_name = data['first_name']
     #use fetchall() if you are expecting more than 1 data row
     cursor.close()
     error = None
@@ -74,6 +76,7 @@ def loginAuth():
         #creates a session for the the user
         #session is a built in
         session['email'] = email
+        session['first_name'] = first_name
         return redirect(url_for('home_customer'))
     else:
         #returns an error message to the html page
@@ -143,7 +146,10 @@ def registerAuth():
                 passport_number,passport_expiration, passport_country,
                 date_of_birth)VALUES
                 (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        cursor.execute(ins, (first_name, last_name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth))
+        cursor.execute(ins, (first_name, last_name, email, password,
+                        building_number, street, city, state, phone_number,
+                        passport_number, passport_expiration, passport_country,
+                        date_of_birth))
         conn.commit()
         cursor.close()
         return render_template('customer_login.html')
@@ -157,16 +163,21 @@ def home_customer():
     return render_template('home_customer.html')
 
 
-@app.route('/post', methods=['GET', 'POST'])
+@app.route('/search', methods=['GET', 'POST'])
 def post():
     username = session['username']
     cursor = conn.cursor();
-    blog = request.form['blog']
-    query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-    cursor.execute(query, (blog, username))
-    conn.commit()
+    departure_airport = request.form['departure_airport']
+    arrival_airport = request.form['arrival_airport']
+    # departure_date = request.form['departure_date']
+    # return_date = request.form['return_date']
+    query = 'SELECT * FROM Flight WHERE departure_airport = %s and arrival_airport = %s'
+    cursor.execute(query, (departure_airport, arrival_airport))
+    data1 = cursor.fetchall()
+    for each in data1:
+        print(each['flight_number'])
     cursor.close()
-    return redirect(url_for('home'))
+    return render_template('home_customer.html', username = username, flights = data1)
 
 @app.route('/logout')
 def logout():

@@ -13,28 +13,33 @@
   </style>
   <script>
     function toggleArriveDate() {
-      if (document.getElementById("arrive_date").style.visibility == "hidden") {
-        document.getElementById("arrive_date").style.visibility = "visible";
-      } else {
-        document.getElementById("arrive_date").style.visibility = "hidden";
+      arr = document.getElementsByClassName("return_date")
+      for (var i=0; i<arr.length; i++) {
+        if (arr[i].style.visibility == "hidden"){
+          arr[i].style.visibility = "visible";
+        } else {
+          arr[i].style.visibility = "hidden";
+        }
       }
     }
   </script>
   <br>
+
   <p>Logged in as {{session['email']}} </p>
   <a href="/track_spending">Track My Spending</a> <br>
   <a href="/home_unlog">Logout</a>
   <a href="/remove_account">Remove Account</a>
-  <h1>Welcome to your Flight Database!</h1>
 
-  <form action="/post" method="POST">
+  <h1>Welcome to your Flight Database, {{session['first_name']}}!</h1>
+
+  <form action="/search" method="POST">
     <h2>Search for flights</h2>
-    <input type="text" placeholder="Departure" required />
-    <input type="text" placeholder="Arrival" required /> <br>
-    <input type="text" placeholder="Departure Date" required /> <br>
+    <input type="text" name = "departure_airport" placeholder="Departure Airport" required />
+    <input type="text" name = "arrival_airport" placeholder="Arrival Ariport" required /> <br>
+    <p> Departure Date <input name = "departure_date" type="date" placeholder="Departure Date" required /> <br></p>
     <input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
     <label for="one-way"> Round Trip?</label><br>
-    <input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> <br>
+    <p class ="return_date" style="visibility: hidden;" > Return Date <input name = "return_date" class="return_date" style="visibility: hidden;" type="date" placeholder="Return Date" /></p> <br>
     <br>
     <input type="submit" value=Search />
   </form>

@@ -11,30 +11,31 @@
 		p{text-align: right;}
 	</style>
 	<h1>Welcome to the Flight Database!</h1>
-	<form action="/post" method="POST">
+	<form action="/search" method="POST">
 
 		<h2>View public information</h2>
-		<input type="text"  placeholder="Departure" required />
-		<input type="text" placeholder="Arrival" required /> </br>
-		<input type="text" placeholder="Departure Date" required /> </br>
+		<input type="text" name= "departure_airport" placeholder="Departure" required />
+		<input type="text" name= "arrival_airport" placeholder="Arrival" required /> </br>
+		<input type="text" name = "departure_date" placeholder="Departure Date" required /> </br>
 		<input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
 		<label for="one-way"> Round Trip?</label><br>
-		<input style="visibility: hidden;" type="text" id="arrive_date" placeholder="Arrival Date" required /> </br>
+		<p class ="return_date" style="visibility: hidden;" > Return Date <input name = "return_date" class="return_date" style="visibility: hidden;" type="date" placeholder="Return Date" required /></p> <br>
 			<br>
 		<input type="submit" value=Search />
 	</form>
 
-
-
 	<script>
-	  function toggleArriveDate() {
-	    if (document.getElementById("arrive_date").style.visibility == "hidden") {
-	      document.getElementById("arrive_date").style.visibility = "visible";
-	    } else {
-	      document.getElementById("arrive_date").style.visibility = "hidden";
-	    }
-	  }
-	</script>
+    function toggleArriveDate() {
+      arr = document.getElementsByClassName("return_date")
+      for (var i=0; i<arr.length; i++) {
+        if (arr[i].style.visibility == "hidden"){
+          arr[i].style.visibility = "visible";
+        } else {
+          arr[i].style.visibility = "hidden";
+      }
+    }
+    }
+  </script>
 
 	<style type="text/css">
 		table,
