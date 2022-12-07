@@ -181,7 +181,7 @@ def post():
     for each in data1:
         print(each['flight_number'])
     cursor.close()
-    return render_template('home_customer.html', email = email, flights = data1)
+    return render_template('home_customer.html', email = email, searched_flights = data1)
 
 @app.route('/logout')
 def logout():
