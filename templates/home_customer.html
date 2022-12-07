@@ -27,7 +27,7 @@
 
   <p>Logged in as {{session['email']}} </p>
   <a href="/track_spending">Track My Spending</a> <br>
-  <a href="/home_unlog">Logout</a>
+  <a href="/logged_out">Logout</a>
   <a href="/remove_account">Remove Account</a>
 
   <h1>Welcome to your Flight Database, {{session['first_name']}}!</h1>
@@ -55,7 +55,7 @@
     <th>Buy</th>
 
 
-    {% for line in flights %}
+    {% for line in searched_flights %}
     <tr>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
@@ -90,7 +90,7 @@
     <th>Cancel</th>
 
 
-    {% for line in flights %}
+    {% for line in customer_flights %}
     <tr>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
@@ -113,7 +113,7 @@
     <th>Depart Time </th>
     <th>Review</th>
 
-    {% for line in flights %}
+    {% for line in previous_flights %}
     <tr>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>

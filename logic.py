@@ -29,6 +29,10 @@ conn = pymysql.connect(host='localhost',
 def hello():
     return render_template('home_unlog.html')
 
+@app.route('/logged_out')
+def logged_out():
+    return render_template('logged_out.html')
+
 #Define route for customer login
 @app.route('/customer_login')
 def customer_login():
@@ -165,19 +169,19 @@ def home_customer():
 
 @app.route('/search', methods=['GET', 'POST'])
 def post():
-    username = session['username']
+    email = session['email']
     cursor = conn.cursor();
     departure_airport = request.form['departure_airport']
     arrival_airport = request.form['arrival_airport']
     # departure_date = request.form['departure_date']
     # return_date = request.form['return_date']
-    query = 'SELECT * FROM Flight WHERE departure_airport = %s and arrival_airport = %s'
-    cursor.execute(query, (departure_airport, arrival_airport))
+    query = 'SELECT * FROM Flight NATURAL JOIN Departs WHERE name = %s' # BROKEN!!!
+    cursor.execute(query, (departure_airport))
     data1 = cursor.fetchall()
     for each in data1:
         print(each['flight_number'])
     cursor.close()
-    return render_template('home_customer.html', username = username, flights = data1)
+    return render_template('home_customer.html', email = email, flights = data1)
 
 @app.route('/logout')
 def logout():
