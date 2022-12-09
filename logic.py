@@ -166,9 +166,8 @@ def home_unlog():
 def home_customer():
     return render_template('home_customer.html')
 
-
-@app.route('/search', methods=['GET', 'POST'])
-def post():
+@app.route('/search_unlog', methods=['GET', 'POST'])
+def search_unlog():
     email = session['email']
     cursor = conn.cursor();
     departure_airport = request.form['departure_airport']
@@ -178,10 +177,34 @@ def post():
     query = 'SELECT * FROM Flight NATURAL JOIN Departs WHERE name = %s' # BROKEN!!!
     cursor.execute(query, (departure_airport))
     data1 = cursor.fetchall()
-    for each in data1:
-        print(each['flight_number'])
-    cursor.close()
-    return render_template('home_customer.html', email = email, searched_flights = data1)
+    if data1:
+        for each in data1:
+            print(each['flight_number'])
+        cursor.close()
+        return render_template('home_unlog.html', email = email, searched_flights = data1)
+    else:
+        error = "This user already exists"
+        return render_template('home_unlog.html', error = error)
+
+@app.route('/search_customer', methods=['GET', 'POST'])
+def search_customer():
+    email = session['email']
+    cursor = conn.cursor();
+    departure_airport = request.form['departure_airport']
+    arrival_airport = request.form['arrival_airport']
+    # departure_date = request.form['departure_date']
+    # return_date = request.form['return_date']
+    query = 'SELECT * FROM Flight NATURAL JOIN Departs WHERE name = %s' # BROKEN!!!
+    cursor.execute(query, (departure_airport))
+    data1 = cursor.fetchall()
+    if data1:
+        for each in data1:
+            print(each['flight_number'])
+        cursor.close()
+        return render_template('home_customer.html', email = email, searched_flights = data1)
+    else:
+        error = "This user already exists"
+        return render_template('home_customer.html', error = error)
 
 @app.route('/logout')
 def logout():
