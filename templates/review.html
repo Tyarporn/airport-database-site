@@ -24,7 +24,9 @@
 {% if complete %}
   <p class="complete"><strong>Status:</strong> {{complete}}</p>
 {% endif %}
-<a href="/">Go back</a>
+<form action="/customer_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
 
 
 </body>

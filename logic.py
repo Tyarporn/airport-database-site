@@ -256,8 +256,8 @@ def search_customer():
     # print(data)
     data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
     if data:
-        for each in data:
-            print(each['flight_number'])
+        # for each in data:
+        #     print(each['flight_number'])
         return render_template('home_customer.html', email = email, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data, searched_flights_2 = data_return)
     else:
         error = "Search Error"
@@ -268,14 +268,15 @@ def sum_spending():
     email = session['email']
     previous_flights = session['previous_flights']
     current_flights = session['current_flights']
-    query = 'SELECT sum(sold_price) FROM Ticket WHERE email = %s;'
+    query = 'SELECT sum(sold_price) FROM Ticket WHERE email = %s and DATEDIFF(purchase_date, CURDATE()) < 365 ;'
     cursor = conn.cursor();
     cursor.execute(query, email);
     data = cursor.fetchone();
-    sum = data['sum(sold_price)']
+    t_sum = data['sum(sold_price)']
+    session['t_sum'] = t_sum
     cursor.close()
 
-    return render_template('track_spending.html', email = email, sum = sum, current_flights = current_flights, previous_flights = previous_flights)
+    return render_template('track_spending.html', email = email, t_sum = t_sum, current_flights = current_flights, previous_flights = previous_flights)
 
 @app.route('/input_review', methods=['GET', 'POST'])
 def input_review():
@@ -324,6 +325,39 @@ def delete_account():
         return redirect('/home_unlog')
     except:
         return render_template('remove_account.html', error="There was a problem with deleting your account")
+
+@app.route('/customer_back', methods=['GET','POST'])
+def customer_back():
+    first_name = session['first_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    return render_template('home_customer.html', first_name = first_name, previous_flights=previous_flights, current_flights=current_flights)
+
+@app.route('/date_spending', methods =['GET', 'POST'])
+def date_spending():
+    email = session['email']
+    t_sum = session['t_sum']
+    cursor = conn.cursor();
+    date1 = request.form['date1']
+    date2 = request.form['date2']
+    query = 'SELECT ticket_ID, airline_name, flight_number, purchase_date, sold_price from Flight NATURAL JOIN Ticket WHERE purchase_date > %s and purchase_date < %s and email = %s'
+    cursor.execute(query, (date1, date2, email))
+    data = cursor.fetchall()
+    cursor.close()
+
+    cursor = conn.cursor();
+    query = 'SELECT sum(sold_price) from Flight NATURAL JOIN Ticket WHERE purchase_date > %s and purchase_date < %s and email = %s'
+    cursor.execute(query, (date1, date2, email))
+    sum_res = cursor.fetchone()
+    sum = sum_res['sum(sold_price)']
+    return render_template('track_spending.html', date_spending = data, sum = sum, t_sum = t_sum)
+
+@app.route('/cancel_flight', methods = ['GET', 'POST'])
+def cancel_flight():
+    ticket_ID = request.form['ticket_ID']
+    flight_number = request.form['flight_number']
+    deletion = '' # to do tomorrow! 
+    return render_template('cancel.html')
 
 @app.route('/logout')
 def logout():

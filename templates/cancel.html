@@ -5,6 +5,13 @@
 
 <body>
 <h1> Cancel a flight</h1>
+<h2>Please input the details of the flight you would like to cancel:</h2>
+<form action="/cancel_flight" method="POST">
+  <input type="text" name= "ticket_ID" placeholder="Ticket ID" />
+  <input type="text" name="flight_number" placeholder="Flight Number"/>
+  <br>
+  <input type="submit" value=Cancel/>
+</form>
 </body>
 
 

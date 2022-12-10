@@ -3,12 +3,48 @@
 <head>
 </head>
 
+
 <body>
 <h1> My Spending </h1>
-<p>Amount spent: {{sum}}</p>
+<p>Total amount spent this year: {{t_sum}}</p>
+<form  action="/date_spending" method="post">
+<input type="date" name = "date1" />
+<input type="date" name = "date2" /><br>
+<input type="submit" value = "Track spending by date" />
+</form>
 
-<a href="/">Go back</a>
+<table>
+  <th>Ticket ID</th>
+  <th>Airline</th>
+  <th>Flight Number</th>
+  <th>Purchase Date</th>
+  <th>Price</th>
 
+  {% for line in date_spending %}
+  <tr>
+    <td>{{line['ticket_ID']}}</td>
+    <td>{{line['airline_name']}}</td>
+    <td>{{line['flight_number']}}</td>
+    <td>{{line['purchase_date']}}</td>
+    <td>{{line['sold_price']}}</td>
+  </tr>
+  {% endfor %}
+
+</table>
+
+<p>Selected Total:{{sum}} </p>
+
+<form action="/customer_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+<!-- <a href="/">Go back</a> -->
+<style type="text/css">
+  table,
+  th,
+  td {
+    border: 1px solid black;
+  }
+</style>
 </body>
 
 
