@@ -7,7 +7,7 @@ import pymysql.cursors
 app = Flask(__name__)
 
 #Configure MySQL
- conn = pymysql.connect(host='localhost',
+conn = pymysql.connect(host='localhost',
                         user='root',
                         password='',
                         db='air_ticket_reservation_system',
