@@ -26,16 +26,22 @@
   <br>
 
   <p>Logged in as {{session['email']}} </p>
-  <a href="/track_spending">Track My Spending</a> <br>
+  <!-- <a href="/track_spending">Track My Spending</a> <br> -->
   <a href="/logged_out">Logout</a>
   <a href="/remove_account">Remove Account</a>
 
   <h1>Welcome to your Flight Database, {{session['first_name']}}!</h1>
 
+  <form  action="/sum_spending" method="GET">
+  <input type="submit" value="Track your spending" />
+  </form>
+
   <form action="/search_customer" method="POST">
     <h2>Search for flights</h2>
-    <input type="text" name = "departure_airport" placeholder="Departure Airport" required />
-    <input type="text" name = "arrival_airport" placeholder="Arrival Ariport" required /> <br>
+    <input type="text" name = "departure_airport" placeholder="Departure Airport"/>
+    <input type="text" name = "arrival_airport" placeholder="Arrival Airport"/> <br>
+    <input type="text" name = "departure_city" placeholder="Departure City"/>
+    <input type="text" name = "arrival_city" placeholder="Arrival City"/> <br>
     <p> Departure Date <input name = "departure_date" type="date" placeholder="Departure Date" required /> <br></p>
     <input type="checkbox" id="round-trip" name="round-trip" value="yes" onChange="toggleArriveDate();">
     <label for="one-way"> Round Trip?</label><br>
@@ -43,7 +49,9 @@
     <br>
     <input type="submit" value=Search />
   </form>
+
   <table>
+    <th>Depart</th>
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
@@ -55,8 +63,9 @@
     <th>Buy</th>
 
 
-    {% for line in searched_flights %}
+    {% for line in searched_flights_1 %}
     <tr>
+      <td> </td>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
@@ -64,13 +73,42 @@
       <td>{{line['arrival_date']}}</td>
       <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
-      <td>{{line['price']}}</td>
+      <td>{{line['base_price']}}</td>
       <td><a href="/buy">Purchase flight</a></td>
     </tr>
     {% endfor %}
   </table>
 
-  <h2>View your flights</h2>
+  <table class = return_date style="visibility: hidden;" >
+    <th>Return</th>
+    <th>Airline</th>
+    <th>Flight Number</th>
+    <th>Depart Date</th>
+    <th>Depart Time </th>
+    <th>Arrival Date </th>
+    <th>Arrival Time </th>
+    <th>Flight Status</th>
+    <th>Price</th>
+    <th>Buy</th>
+
+
+    {% for line in searched_flights_2 %}
+    <tr>
+      <td> </td>
+      <td>{{line['airline_name']}}</td>
+      <td>{{line['flight_number']}}</td>
+      <td>{{line['departure_date']}}</td>
+      <td>{{line['departure_time']}}</td>
+      <td>{{line['arrival_date']}}</td>
+      <td>{{line['arrival_time']}}</td>
+      <td>{{line['flight_status']}}</td>
+      <td>{{line['base_price']}}</td>
+      <td><a href="/buy">Purchase flight</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Your current and upcoming flights</h2>
   <style type="text/css">
     table,
     th,
@@ -82,35 +120,36 @@
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
-    <th>Depart Time </th>
+    <!-- <th>Depart Time </th> -->
     <th>Arrival Date </th>
-    <th>Arrival Time </th>
+    <!-- <th>Arrival Time </th> -->
     <th>Flight Status</th>
-    <th>Price</th>
     <th>Cancel</th>
 
 
-    {% for line in customer_flights %}
+    {% for line in current_flights %}
     <tr>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
-      <td>{{line['departure_time']}}</td>
+      <!-- <td>{{line['departure_time']}}</td> -->
       <td>{{line['arrival_date']}}</td>
-      <td>{{line['arrival_time']}}</td>
+      <!-- <td>{{line['arrival_time']}}</td> -->
       <td>{{line['flight_status']}}</td>
-      <td>{{line['price']}}</td>
+
+      {% if(line['cancel']) %}
       <td><a href="/cancel">Cancel flight</a></td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>
 
-  <h2>Previous Flights</h2>
+  <h2>Your previous flights</h2>
   <table>
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
-    <th>Depart Time </th>
+    <!-- <th>Depart Time </th> -->
     <th>Review</th>
 
     {% for line in previous_flights %}
@@ -118,8 +157,10 @@
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
-      <td>{{line['departure_time']}}</td>
-      <td><a href="/review">Review this flight</a></td>
+      <!-- <td>{{line['departure_time']}}</td> -->
+      <td>  <form  action="/review" method="GET">
+        <input type="submit" value="Leave a review" />
+        </form></td>
     </tr>
     {% endfor %}
   </table>
