@@ -8,7 +8,19 @@ from datetime import date, datetime
 app = Flask(__name__)
 
 #Configure MySQL
+<<<<<<< HEAD
+conn = pymysql.connect(host='localhost',
+                        user='root',
+                        password='',
+                        db='air_ticket_reservation_system',
+                        charset='utf8mb4',
+                        cursorclass=pymysql.cursors.DictCursor)
 
+# Configure MySQL
+"""
+=======
+
+>>>>>>> 136af132b057c440838f3c80bda5032453879e47
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='root',
