@@ -1,0 +1,33 @@
+<html>
+<head>
+</head>
+<body>
+<h1> Input a review </h1>
+<form action="/input_review" method="POST">
+  <h2>Input details and review</h2>
+  <input type="email" name = "email" placeholder="Email"/>
+  <input type="text" name = "flight_number" placeholder="Flight Number"/> <br>
+  <label for="departure_date">Departure Date:</label>
+  <input type="date" name = "departure_date" placeholder="Departure Date"/>
+  <label for="departure_time">Departure Time:</label>
+  <input type="time" name = "departure_time""/><br>
+  <label for="airline_name">Airline Name:</label>
+  <input type="text" name = "airline_name""/><br>
+  <label for="stars">Stars:</label>
+  <input type="number" name="stars" min="1" max="5"/>
+  <input type="text" name = "comments" placeholder="Comments"/> <br>
+  <input type="submit" value=Send />
+</form>
+{% if error %}
+  <p class="error"><strong>Error:</strong> {{error}}</p>
+{% endif %}
+{% if complete %}
+  <p class="complete"><strong>Status:</strong> {{complete}}</p>
+{% endif %}
+<a href="/">Go back</a>
+
+
+</body>
+
+
+</html>
