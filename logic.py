@@ -312,15 +312,18 @@ def input_review():
             error = "Flight not found!"
             return render_template('review.html', error=error)
 
-@app.route('/delete_account')
+@app.route('/delete_account', methods=['GET', 'POST'])
 def delete_account():
-    email = session['email']
-    delete_query = "DELETE FROM Customer WHERE email=%s;"
-    cursor = conn.cursor();
-    cursor.execute(delete_query, email)
-    conn.commit()
-    cursor.close()
-    return redirect('/')
+    try:
+        email = session['email']
+        cursor = conn.cursor();
+        delete_query = "DELETE FROM Customer WHERE email=%s;"
+        cursor.execute(delete_query, email)
+        conn.commit()
+        cursor.close()
+        return redirect('/home_unlog')
+    except:
+        return render_template('remove_account.html', error="There was a problem with deleting your account")
 
 @app.route('/logout')
 def logout():
