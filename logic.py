@@ -8,15 +8,15 @@ from datetime import date, datetime
 app = Flask(__name__)
 
 #Configure MySQL
-conn = pymysql.connect(host='localhost',
-                        user='root',
-                        password='',
-                        db='air_ticket_reservation_system',
-                        charset='utf8mb4',
-                        cursorclass=pymysql.cursors.DictCursor)
+# conn = pymysql.connect(host='localhost',
+#                         user='root',
+#                         password='',
+#                         db='air_ticket_reservation_system',
+#                         charset='utf8mb4',
+#                         cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
-"""
+
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='root',
@@ -24,7 +24,7 @@ conn = pymysql.connect(host='localhost',
                        db='air_ticket_reservation_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
-"""
+
 
 def search_flights(departure_airport,arrival_airport, departure_city, arrival_city, departure_date):
     cursor = conn.cursor();
@@ -62,6 +62,7 @@ def review():
 
 @app.route('/cancel')
 def cancel():
+    # session['email'] = email
     return render_template('cancel.html')
 
 @app.route('/change_flight_status')
@@ -108,6 +109,12 @@ def staff_register():
 @app.route('/register')
 def register():
     return render_template('register.html')
+
+@app.route('/buy', methods=['GET', 'POST'])
+def buy():
+    session['searched_flights_1'] = searched_flights_1
+    session['searched_flights_2'] = searched_flights_2
+    return render_template('buy.html')
 
 #Authenticates the customer login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -186,7 +193,7 @@ def staffLoginAuth():
         session['username'] = username
         session['first_name'] = first_name
         session['airline_name'] = airline_name
-        
+
         cursor = conn.cursor()
         query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE departure_date < CURRENT_DATE()'
         cursor.execute(query)
@@ -296,7 +303,7 @@ def registerStaffAuth():
             ins = """INSERT INTO Airline_Staff_Phone_Number (username, phone_number)VALUES
                 (%s, %s)"""
             cursor.execute(ins, (username, phone_number))
-            
+
         conn.commit()
         cursor.close()
         return render_template('staff_login.html')
@@ -320,7 +327,7 @@ def search_unlog():
     departure_city = request.form['departure_city']
     arrival_city = request.form['arrival_city']
     departure_date = request.form['departure_date']
-    return_date = request.form['return_date']
+    # return_date = request.form['return_date']
     data1 = search_flights(departure_airport, arrival_airport,departure_city,arrival_city, departure_date)
     if data1:
         for each in data1:
@@ -345,6 +352,8 @@ def search_customer():
     data = search_flights(departure_airport, arrival_airport, departure_city, arrival_city, departure_date)
     # print(data)
     data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
+    session['searched_flights_1'] = data
+    session['searched_flights_2'] = data_return
     if data:
         # for each in data:
         #     print(each['flight_number'])
@@ -489,8 +498,16 @@ def date_spending():
 def cancel_flight():
     ticket_ID = request.form['ticket_ID']
     flight_number = request.form['flight_number']
-    deletion = '' # to do tomorrow!
-    return render_template('cancel.html')
+    email=session['email']
+    cursor = conn.cursor();
+    deletion_query = "DELETE FROM Ticket WHERE email=%s and ticket_ID = %s and flight_number = %s;"
+    try:
+        cursor.execute(query, (email, ticket_ID, flight_number))
+        cursor.close()
+        return render_template('cancel.html')
+    except:
+        error = "Flight not found"
+        return render_template('cancel.html', error = error)
 
 @app.route('/edit_flight_status', methods = ['GET', 'POST'])
 def edit_flight_status():

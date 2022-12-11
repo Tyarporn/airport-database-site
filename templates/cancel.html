@@ -10,8 +10,16 @@
   <input type="text" name= "ticket_ID" placeholder="Ticket ID" />
   <input type="text" name="flight_number" placeholder="Flight Number"/>
   <br>
-  <input type="submit" value=Cancel/>
+  <input type="submit" value="Cancel this flight">
 </form>
+
+<form action="/customer_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+
+{% if error %}
+  <p class="error"><strong>Error:</strong> {{error}}</p>
+{% endif %}
 </body>
 
 
