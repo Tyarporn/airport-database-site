@@ -153,12 +153,12 @@ def loginAuth():
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
-#        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-#            today = date.today()
-#            if((each['departure_date'] - today).days < 1):
-#                each['cancel'] = False
-#            else:
-#                each['cancel'] = True
+        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+            today = date.today()
+            if((each['departure_date'] - today).days < 1):
+                each['cancel'] = False
+            else:
+                each['cancel'] = True
         session['current_flights'] = current_flights
         print(current_flights)
         cursor.close()
@@ -194,7 +194,7 @@ def staffLoginAuth():
         session['first_name'] = first_name
         session['airline_name'] = airline_name
         cursor = conn.cursor()
-        query = 'SELECT * FROM Flight WHERE airline_name = %s AND departure_date < NOW()'
+        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE airline_name = %s AND departure_date < NOW()'
         cursor.execute(query, (airline_name))
         previous_flights = cursor.fetchall()
         session['previous_flights'] = previous_flights
@@ -205,7 +205,7 @@ def staffLoginAuth():
 
         """
         cursor = conn.cursor()
-        query = 'SELECT * FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY);'
+        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY);'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
 
