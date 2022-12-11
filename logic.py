@@ -76,6 +76,10 @@ def logged_out():
 def remove_account():
     return render_template('remove_account.html')
 
+@app.route('/remove_staff_account')
+def remove_staff_account():
+    return render_template('remove_staff_account.html')
+
 @app.route('/track_spending')
 def track_spending():
     return render_template('track_spending.html')
@@ -367,7 +371,7 @@ def search_staff():
     if data:
         # for each in data:
         #     print(each['flight_number'])
-        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data, searched_flights_2 = data_return)
+        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data)
     else:
         error = "Search Error"
         return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, error = error)
@@ -435,12 +439,32 @@ def delete_account():
     except:
         return render_template('remove_account.html', error="There was a problem with deleting your account")
 
+@app.route('/staff_delete_account', methods=['GET', 'POST'])
+def staff_delete_account():
+    try:
+        username = session['username']
+        cursor = conn.cursor();
+        delete_query = "DELETE FROM Airline_Staff WHERE username=%s;"
+        cursor.execute(delete_query, username)
+        conn.commit()
+        cursor.close()
+        return redirect('/home_unlog')
+    except:
+        return render_template('remove_account.html', error="There was a problem with deleting your account")
+
 @app.route('/customer_back', methods=['GET','POST'])
 def customer_back():
     first_name = session['first_name']
     previous_flights = session['previous_flights']
     current_flights = session['current_flights']
     return render_template('home_customer.html', first_name = first_name, previous_flights=previous_flights, current_flights=current_flights)
+
+@app.route('/staff_back', methods=['GET','POST'])
+def staff_back():
+    first_name = session['first_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    return render_template('home_staff.html', first_name = first_name, previous_flights=previous_flights, current_flights=current_flights)
 
 @app.route('/date_spending', methods =['GET', 'POST'])
 def date_spending():
@@ -470,6 +494,8 @@ def cancel_flight():
 
 @app.route('/edit_flight_status', methods = ['GET', 'POST'])
 def edit_flight_status():
+    username = session['username']
+    previous_flights = session['previous_flights']
     airline_name = request.form['airline_name']
     flight_number = request.form['flight_number']
     departure_date = request.form['departure_date']
@@ -489,7 +515,17 @@ def edit_flight_status():
         cursor.execute(ins, (flight_status, airline_name, flight_number, departure_date, departure_time))
         conn.commit()
         cursor.close()
-        return redirect('')
+        cursor = conn.cursor()
+        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE  airline_name = %s AND departure_date >= CURRENT_DATE() AND  departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)'
+        cursor.execute(query, (airline_name))
+        current_flights = cursor.fetchall()
+
+        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+            each['edit'] = True
+        session['current_flights'] = current_flights
+        print(current_flights)
+        cursor.close()
+        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights)
     elif(flight_status != "Delayed" or flight_status != "On-time"):
         error = "This is not a valid flight status"
         return render_template('change_flight_status.html', error = error)
@@ -503,17 +539,6 @@ def logout():
     session.pop('username')
     session.clear()
     return redirect('/')
-    
-def url_back(fallback, *args, **kwargs):
-    for step in flask.session.get('history', [])[::-1]:
-        if (step[0] == flask.request.endpoint and
-                step[1] == flask.request.view_args):
-            continue
-
-        if 200 <= step[2] < 300:
-            return flask.url_for(step[0], **step[1])
-
-    return flask.url_for(fallback, *args, **kwargs)
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000

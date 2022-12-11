@@ -26,7 +26,7 @@
   <br>
   <!-- <a href="/track_spending">Track My Spending</a> <br> -->
   <a href="/logged_out">Logout</a>
-  <a href="/remove_account">Remove Account</a>
+  <a href="/remove_staff_account">Remove Account</a>
 
   <h1>Welcome to your Flight Database, {{session['first_name']}}!</h1>
 
@@ -49,7 +49,8 @@
   </form>
 
   <table>
-    <th>Depart</th>
+    <th>Departs</th>
+    <th>Arrives</th>
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
@@ -63,7 +64,8 @@
 
     {% for line in searched_flights_1 %}
     <tr>
-      <td> </td>
+      <td>{{line['departure_airport']}}</td>
+      <td>{{line['arrival_aiport']}}</td>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
@@ -78,7 +80,8 @@
   </table>
 
   <table class = return_date style="visibility: hidden;" >
-    <th>Return</th>
+      <th>Departs</th>
+      <th>Arrives</th>
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
@@ -92,16 +95,17 @@
 
     {% for line in searched_flights_2 %}
     <tr>
-      <td> </td>
-      <td>{{line['airline_name']}}</td>
-      <td>{{line['flight_number']}}</td>
-      <td>{{line['departure_date']}}</td>
-      <td>{{line['departure_time']}}</td>
-      <td>{{line['arrival_date']}}</td>
-      <td>{{line['arrival_time']}}</td>
-      <td>{{line['flight_status']}}</td>
-      <td>{{line['base_price']}}</td>
-      <td><a href="/buy">Purchase flight</a></td>
+        <td>{{line['departure_airport']}}</td>
+        <td>{{line['arrival_aiport']}}</td>
+        <td>{{line['airline_name']}}</td>
+        <td>{{line['flight_number']}}</td>
+        <td>{{line['departure_date']}}</td>
+        <td>{{line['departure_time']}}</td>
+        <td>{{line['arrival_date']}}</td>
+        <td>{{line['arrival_time']}}</td>
+        <td>{{line['flight_status']}}</td>
+        <td>{{line['base_price']}}</td>
+        <td><a href="/buy">Purchase flight</a></td>
     </tr>
     {% endfor %}
   </table>
