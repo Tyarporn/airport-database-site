@@ -58,14 +58,13 @@
     <th>Arrival Date </th>
     <th>Arrival Time </th>
     <th>Flight Status</th>
-    <th>Price</th>
-    <th>Buy</th>
+    <th>Change Flight Status</th>
 
 
     {% for line in searched_flights_1 %}
     <tr>
       <td>{{line['departure_airport']}}</td>
-      <td>{{line['arrival_aiport']}}</td>
+      <td>{{line['arrival_airport']}}</td>
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
@@ -73,8 +72,7 @@
       <td>{{line['arrival_date']}}</td>
       <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
-      <td>{{line['base_price']}}</td>
-      <td><a href="/buy">Purchase flight</a></td>
+      <td><a href="/change_flight_status">Change Flight Status</a></td>
     </tr>
     {% endfor %}
   </table>
@@ -96,7 +94,7 @@
     {% for line in searched_flights_2 %}
     <tr>
         <td>{{line['departure_airport']}}</td>
-        <td>{{line['arrival_aiport']}}</td>
+        <td>{{line['arrival_airport']}}</td>
         <td>{{line['airline_name']}}</td>
         <td>{{line['flight_number']}}</td>
         <td>{{line['departure_date']}}</td>
@@ -119,53 +117,62 @@
     }
   </style>
   <table>
-    <th>Airline</th>
-    <th>Flight Number</th>
-    <th>Depart Date</th>
-    <!-- <th>Depart Time </th> -->
-    <th>Arrival Date </th>
-    <!-- <th>Arrival Time </th> -->
-    <th>Flight Status</th>
-    <th>Change Flight Status</th>
+      <th>Departs</th>
+      <th>Arrives</th>
+      <th>Airline</th>
+      <th>Flight Number</th>
+      <th>Depart Date</th>
+      <th>Depart Time </th>
+      <th>Arrival Date </th>
+      <th>Arrival Time </th>
+      <th>Flight Status</th>
+      <th>Change Flight Status</th>
 
 
     {% for line in current_flights %}
     <tr>
-      <td>{{line['airline_name']}}</td>
-      <td>{{line['flight_number']}}</td>
-      <td>{{line['departure_date']}}</td>
-      <!-- <td>{{line['departure_time']}}</td> -->
-      <td>{{line['arrival_date']}}</td>
-      <!-- <td>{{line['arrival_time']}}</td> -->
-      <td>{{line['flight_status']}}</td>
-      
-      {% if(line['edit']) %}
-      <td><a href="/change_flight_status">Change Flight Status</a></td>
-      {% endif %}
-    </tr>
-    {% endfor %}
-  </table>
+        <td>{{line['departure_airport']}}</td>
+        <td>{{line['arrival_airport']}}</td>
+        <td>{{line['airline_name']}}</td>
+        <td>{{line['flight_number']}}</td>
+        <td>{{line['departure_date']}}</td>
+        <td>{{line['departure_time']}}</td>
+        <td>{{line['arrival_date']}}</td>
+        <td>{{line['arrival_time']}}</td>
+        <td>{{line['flight_status']}}</td>
+        <td><a href="/change_flight_status">Change Flight Status</a></td>
+      </tr>
+      {% endfor %}
+    </table>
 
   <h2>Your previous flights</h2>
   <table>
-    <th>Airline</th>
-    <th>Flight Number</th>
-    <th>Depart Date</th>
-    <!-- <th>Depart Time </th> -->
-    <th>Review</th>
+      <th>Departs</th>
+      <th>Arrives</th>
+      <th>Airline</th>
+      <th>Flight Number</th>
+      <th>Depart Date</th>
+      <th>Depart Time </th>
+      <th>Arrival Date </th>
+      <th>Arrival Time </th>
+      <th>Flight Status</th>
+      <th>Change Flight Status</th>
 
     {% for line in previous_flights %}
     <tr>
-      <td>{{line['airline_name']}}</td>
-      <td>{{line['flight_number']}}</td>
-      <td>{{line['departure_date']}}</td>
-      <!-- <td>{{line['departure_time']}}</td> -->
-      <td>  <form  action="/review" method="GET">
-        <input type="submit" value="Leave a review" />
-        </form></td>
-    </tr>
-    {% endfor %}
-  </table>
+        <td>{{line['departure_airport']}}</td>
+        <td>{{line['arrival_airport']}}</td>
+        <td>{{line['airline_name']}}</td>
+        <td>{{line['flight_number']}}</td>
+        <td>{{line['departure_date']}}</td>
+        <td>{{line['departure_time']}}</td>
+        <td>{{line['arrival_date']}}</td>
+        <td>{{line['arrival_time']}}</td>
+        <td>{{line['flight_status']}}</td>
+        <td><a href="/change_flight_status">Change Flight Status</a></td>
+      </tr>
+      {% endfor %}
+    </table>
 
 </body>
 
