@@ -24,8 +24,6 @@
     }
   </script>
   <br>
-
-  <p>Logged in as {{session['email']}} </p>
   <!-- <a href="/track_spending">Track My Spending</a> <br> -->
   <a href="/logged_out">Logout</a>
   <a href="/remove_account">Remove Account</a>
@@ -36,7 +34,7 @@
   <input type="submit" value="Track your spending" />
   </form>
 
-  <form action="/search_customer" method="POST">
+  <form action="/search_staff" method="POST">
     <h2>Search for flights</h2>
     <input type="text" name = "departure_airport" placeholder="Departure Airport"/>
     <input type="text" name = "arrival_airport" placeholder="Arrival Airport"/> <br>
@@ -124,7 +122,7 @@
     <th>Arrival Date </th>
     <!-- <th>Arrival Time </th> -->
     <th>Flight Status</th>
-    <th>Cancel</th>
+    <th>Change Flight Status</th>
 
 
     {% for line in current_flights %}
@@ -136,9 +134,9 @@
       <td>{{line['arrival_date']}}</td>
       <!-- <td>{{line['arrival_time']}}</td> -->
       <td>{{line['flight_status']}}</td>
-
-      {% if(line['cancel']) %}
-      <td><a href="/cancel">Cancel flight</a></td>
+      
+      {% if(line['edit']) %}
+      <td><a href="/change_flight_status">Change Flight Status</a></td>
       {% endif %}
     </tr>
     {% endfor %}

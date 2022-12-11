@@ -64,6 +64,10 @@ def review():
 def cancel():
     return render_template('cancel.html')
 
+@app.route('/change_flight_status')
+def change_flight_status():
+    return render_template('change_flight_status.html')
+
 @app.route('/logged_out')
 def logged_out():
     return render_template('logged_out.html')
@@ -162,10 +166,13 @@ def staffLoginAuth():
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT username, password FROM Airline_Staff WHERE username = %s and password = %s'
+    query = 'SELECT username, password, first_name, airline_name FROM Airline_Staff WHERE username = %s and password = %s'
     cursor.execute(query, (username, password))
     #stores the results in a variable
     data = cursor.fetchone()
+    print(data)
+    first_name = data['first_name']
+    airline_name = data['airline_name']
     #use fetchall() if you are expecting more than 1 data row
     cursor.close()
     error = None
@@ -173,13 +180,37 @@ def staffLoginAuth():
         #creates a session for the the user
         #session is a built in
         session['username'] = username
-        return redirect(url_for('home_unlog'))
+        session['first_name'] = first_name
+        session['airline_name'] = airline_name
+        
+        cursor = conn.cursor()
+        query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE departure_date < CURRENT_DATE()'
+        cursor.execute(query)
+        previous_flights = cursor.fetchall()
+        session['previous_flights'] = previous_flights
+        print(previous_flights)
+        cursor.close()
+        """
+        1. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.
+
+        """
+        cursor = conn.cursor()
+        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE  airline_name = %s AND departure_date >= CURRENT_DATE() AND  departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)'
+        cursor.execute(query, (airline_name))
+        current_flights = cursor.fetchall()
+
+        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+            each['edit'] = True
+        session['current_flights'] = current_flights
+        print(current_flights)
+        cursor.close()
+        return render_template('home_staff.html', previous_flights=previous_flights, current_flights = current_flights)
     else:
         #returns an error message to the html page
         error = 'Invalid login or username'
         return render_template('staff_login.html', error=error)
 
-#Authenticates the register
+#Authenticates the customer register
 @app.route('/registerCustomer', methods=['GET', 'POST'])
 def registerAuth():
     #grabs information from the forms
@@ -209,7 +240,7 @@ def registerAuth():
     if(data):
         #If the previous query returns data, then user exists
         error = "This user already exists"
-        return render_template('register.html', error = error)
+        return render_template('register.html', error = error) # Did you mean customer_register?
     else:
         ins = """INSERT INTO Customer (first_name, last_name, email, password,
                 building_number, street, city, state, phone_number,
@@ -224,6 +255,48 @@ def registerAuth():
         cursor.close()
         return render_template('customer_login.html')
 
+#Authenticates the register
+@app.route('/registerStaffAuth', methods=['GET', 'POST'])
+def registerStaffAuth():
+    #grabs information from the forms
+    username = request.form['username']
+    password = request.form['password']  # STRAIGHT UP STORING PASSWORD. CHANGE LATER!!!!
+    email = request.form['email']
+    phone_number = request.form['phone_number']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    date_of_birth = request.form['date_of_birth']
+    airline_name = request.form['airline_name']
+
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT * FROM Airline_Staff WHERE username = %s AND airline_name = %s'
+    cursor.execute(query, (username, airline_name))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    error = None
+    if(data):
+        #If the previous query returns data, then user exists
+        error = "This user already exists"
+        return render_template('staff_register.html', error = error)
+    else:
+        ins = """INSERT INTO Airline_Staff (username, password, first_name, last_name, date_of_birth, airline_name)VALUES
+                (%s, %s, %s, %s, %s, %s)"""
+        cursor.execute(ins, (username, password, first_name, last_name, date_of_birth, airline_name))
+        ins = """INSERT INTO Airline_Staff_Email (username, email)VALUES
+                (%s, %s)"""
+        cursor.execute(ins, (username, email))
+        if (phone_number != ""):
+            ins = """INSERT INTO Airline_Staff_Phone_Number (username, phone_number)VALUES
+                (%s, %s)"""
+            cursor.execute(ins, (username, phone_number))
+            
+        conn.commit()
+        cursor.close()
+        return render_template('staff_login.html')
+
 @app.route('/home_unlog')
 def home_unlog():
     return render_template('home_unlog.html')
@@ -231,6 +304,10 @@ def home_unlog():
 @app.route('/home_customer')
 def home_customer():
     return render_template('home_customer.html')
+
+@app.route('/home_staff')
+def home_staff():
+    return render_template('home_staff.html')
 
 @app.route('/search_unlog', methods=['GET', 'POST'])
 def search_unlog():
@@ -271,6 +348,29 @@ def search_customer():
     else:
         error = "Search Error"
         return render_template('home_customer.html', email = email, previous_flights = previous_flights, current_flights = current_flights, error = error)
+
+@app.route('/search_staff', methods=['GET', 'POST'])
+def search_staff():
+    username = session['username']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    departure_airport = request.form['departure_airport']
+    arrival_airport = request.form['arrival_airport']
+    departure_city = request.form['departure_city']
+    arrival_city = request.form['arrival_city']
+    departure_date = request.form['departure_date']
+    return_date = request.form['return_date']
+
+    data = search_flights(departure_airport, arrival_airport, departure_city, arrival_city, departure_date)
+    # print(data)
+    data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
+    if data:
+        # for each in data:
+        #     print(each['flight_number'])
+        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data, searched_flights_2 = data_return)
+    else:
+        error = "Search Error"
+        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, error = error)
 
 @app.route('/sum_spending', methods=['GET', 'POST'])
 def sum_spending():
@@ -368,11 +468,52 @@ def cancel_flight():
     deletion = '' # to do tomorrow!
     return render_template('cancel.html')
 
+@app.route('/edit_flight_status', methods = ['GET', 'POST'])
+def edit_flight_status():
+    airline_name = request.form['airline_name']
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    flight_status = request.form['flight_status']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT airline_name, flight_number, departure_date, departure_time FROM Flight WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (airline_name, flight_number, departure_date, departure_time))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    error = None
+    if(data and (flight_status == "Delayed" or flight_status == "On-Time")):
+        ins = """UPDATE Flight SET flight_status = %s WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s"""
+        cursor.execute(ins, (flight_status, airline_name, flight_number, departure_date, departure_time))
+        conn.commit()
+        cursor.close()
+        return redirect('')
+    elif(flight_status != "Delayed" or flight_status != "On-time"):
+        error = "This is not a valid flight status"
+        return render_template('change_flight_status.html', error = error)
+    else:
+        #If the previous query doesn't return data, then throw error
+        error = "This flight does not exit"
+        return render_template('change_flight_status.html', error = error)
+
 @app.route('/logout')
 def logout():
     session.pop('username')
     session.clear()
     return redirect('/')
+    
+def url_back(fallback, *args, **kwargs):
+    for step in flask.session.get('history', [])[::-1]:
+        if (step[0] == flask.request.endpoint and
+                step[1] == flask.request.view_args):
+            continue
+
+        if 200 <= step[2] < 300:
+            return flask.url_for(step[0], **step[1])
+
+    return flask.url_for(fallback, *args, **kwargs)
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
