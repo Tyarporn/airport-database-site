@@ -3,6 +3,7 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 from datetime import date, datetime
+import json
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -141,15 +142,17 @@ def loginAuth():
         session['first_name'] = first_name
 
         cursor = conn.cursor()
-        query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date < CURRENT_DATE()'
+        query = 'SELECT airline_name, flight_number, departure_date, departure_time FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date < CURRENT_DATE()'
         cursor.execute(query, (email))
         previous_flights = cursor.fetchall()
         session['previous_flights'] = previous_flights
-        print(previous_flights)
+        for each in previous_flights:
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])       
         cursor.close()
 
         cursor = conn.cursor()
-        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date >= CURRENT_DATE()'
+        query = 'SELECT airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date >= CURRENT_DATE()'
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
@@ -159,8 +162,12 @@ def loginAuth():
                 each['cancel'] = False
             else:
                 each['cancel'] = True
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])
+            each['arrival_date'] = str(each['arrival_date'])
+            each['arrival_time'] = str(each['arrival_time'])
         session['current_flights'] = current_flights
-        print(current_flights)
+        print("current_flights: ", current_flights)
         cursor.close()
         return render_template('home_customer.html', previous_flights=previous_flights, current_flights = current_flights)
     else:
@@ -212,6 +219,7 @@ def staffLoginAuth():
 
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
             each['edit'] = True
+
         session['current_flights'] = current_flights
         print(current_flights)
         cursor.close()
@@ -352,8 +360,20 @@ def search_customer():
     data = search_flights(departure_airport, arrival_airport, departure_city, arrival_city, departure_date)
     # print(data)
     data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
-    session['searched_flights_1'] = data
-    session['searched_flights_2'] = data_return
+    for each in data:
+        each['departure_date'] = str(each['departure_date'])
+        each['departure_time'] = str(each['departure_time'])
+        each['arrival_date'] = str(each['arrival_date'])
+        each['arrival_time'] = str(each['arrival_time'])
+        # json.dumps(each, indent=4, sort_keys=True, default=str())
+    for each in data_return:
+        each['departure_date'] = str(each['departure_date'])
+        each['departure_time'] = str(each['departure_time'])
+        each['arrival_date'] = str(each['arrival_date'])
+        each['arrival_time'] = str(each['arrival_time'])
+    print(data)
+    # session['searched_flights_1'] = data
+    # session['searched_flights_2'] = data_return
     if data:
         # for each in data:
         #     print(each['flight_number'])
@@ -464,8 +484,27 @@ def staff_delete_account():
 @app.route('/customer_back', methods=['GET','POST'])
 def customer_back():
     first_name = session['first_name']
-    previous_flights = session['previous_flights']
-    current_flights = session['current_flights']
+    email = session['email']
+    cursor = conn.cursor()
+    query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date < CURRENT_DATE()'
+    cursor.execute(query, (email))
+    previous_flights = cursor.fetchall()
+    session['previous_flights'] = previous_flights
+    cursor.close()
+
+    cursor = conn.cursor()
+    query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date >= CURRENT_DATE()'
+    cursor.execute(query, (email))
+    current_flights = cursor.fetchall()
+    for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+        today = date.today()
+        if((each['departure_date'] - today).days < 1):
+            each['cancel'] = False
+        else:
+            each['cancel'] = True
+    session['current_flights'] = current_flights
+    cursor.close()
+
     return render_template('home_customer.html', first_name = first_name, previous_flights=previous_flights, current_flights=current_flights)
 
 @app.route('/staff_back', methods=['GET','POST'])
@@ -500,12 +539,24 @@ def cancel_flight():
     flight_number = request.form['flight_number']
     email=session['email']
     cursor = conn.cursor();
-    deletion_query = "DELETE FROM Ticket WHERE email=%s and ticket_ID = %s and flight_number = %s;"
-    try:
-        cursor.execute(query, (email, ticket_ID, flight_number))
+    query = "SELECT * FROM Ticket WHERE email=%s AND ticket_ID = %s AND flight_number = %s;"
+    cursor.execute(query, (email, ticket_ID, flight_number))
+    data = cursor.fetchall()
+    cursor.close()
+    if(data):
+        cursor = conn.cursor();
+        deletion_query = "DELETE FROM Purchased_With WHERE email=%s AND ticket_ID = %s;"
+        cursor.execute(deletion_query, (email, ticket_ID))
+        conn.commit()
         cursor.close()
-        return render_template('cancel.html')
-    except:
+
+        cursor = conn.cursor();
+        deletion_query = "DELETE FROM Ticket WHERE email=%s AND ticket_ID = %s AND flight_number = %s;"
+        cursor.execute(deletion_query, (email, ticket_ID, flight_number))
+        conn.commit()
+        cursor.close()
+        return render_template('cancel.html', success = "success")
+    else:
         error = "Flight not found"
         return render_template('cancel.html', error = error)
 
