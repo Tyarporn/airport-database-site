@@ -8,22 +8,22 @@ from datetime import date, datetime
 app = Flask(__name__)
 
 #Configure MySQL
-# conn = pymysql.connect(host='localhost',
-#                         user='root',
-#                         password='',
-#                         db='air_ticket_reservation_system',
-#                         charset='utf8mb4',
-#                         cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(host='localhost',
+                         user='root',
+                         password='',
+                         db='air_ticket_reservation_system',
+                         charset='utf8mb4',
+                         cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
 
-conn = pymysql.connect(host='localhost',
-                       user='root',
-                       password='root',
-                       port= 8889,
-                       db='air_ticket_reservation_system',
-                       charset='utf8mb4',
-                       cursorclass=pymysql.cursors.DictCursor)
+#conn = pymysql.connect(host='localhost',
+#                       user='root',
+#                       password='root',
+#                       port= 8889,
+#                       db='air_ticket_reservation_system',
+#                       charset='utf8mb4',
+#                       cursorclass=pymysql.cursors.DictCursor)
 
 
 def search_flights(departure_airport,arrival_airport, departure_city, arrival_city, departure_date):
@@ -153,12 +153,12 @@ def loginAuth():
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
-        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-            today = date.today()
-            if((each['departure_date'] - today).days < 1):
-                each['cancel'] = False
-            else:
-                each['cancel'] = True
+#        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+#            today = date.today()
+#            if((each['departure_date'] - today).days < 1):
+#                each['cancel'] = False
+#            else:
+#                each['cancel'] = True
         session['current_flights'] = current_flights
         print(current_flights)
         cursor.close()
@@ -193,10 +193,9 @@ def staffLoginAuth():
         session['username'] = username
         session['first_name'] = first_name
         session['airline_name'] = airline_name
-
         cursor = conn.cursor()
-        query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE departure_date < CURRENT_DATE()'
-        cursor.execute(query)
+        query = 'SELECT * FROM Flight WHERE airline_name = %s AND departure_date < NOW()'
+        cursor.execute(query, (airline_name))
         previous_flights = cursor.fetchall()
         session['previous_flights'] = previous_flights
         print(previous_flights)
@@ -206,12 +205,16 @@ def staffLoginAuth():
 
         """
         cursor = conn.cursor()
-        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE  airline_name = %s AND departure_date >= CURRENT_DATE() AND  departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)'
+        query = 'SELECT * FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY);'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
 
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-            each['edit'] = True
+            today = date.today()
+            if((each['departure_date'] - today).days < 0):
+                each['edit'] = False
+            else:
+                each['edit'] = True
         session['current_flights'] = current_flights
         print(current_flights)
         cursor.close()
@@ -378,8 +381,6 @@ def search_staff():
     # print(data)
     data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
     if data:
-        # for each in data:
-        #     print(each['flight_number'])
         return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data)
     else:
         error = "Search Error"
@@ -533,7 +534,7 @@ def edit_flight_status():
         conn.commit()
         cursor.close()
         cursor = conn.cursor()
-        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE  airline_name = %s AND departure_date >= CURRENT_DATE() AND  departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)'
+        query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY)'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
 
