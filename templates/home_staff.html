@@ -58,6 +58,7 @@
     <th>Arrival Date </th>
     <th>Arrival Time </th>
     <th>Flight Status</th>
+    <th>Customers </th>
     <th>Change Flight Status</th>
 
 
@@ -72,7 +73,12 @@
       <td>{{line['arrival_date']}}</td>
       <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
-      <td><a href="/change_flight_status">Change Flight Status</a></td>
+      <td><a href="/view_customers">View Customers</a></td>
+      {% if(line['edit']) %}
+      <td>  <form  action="/change_flight_status">
+        <input type="submit" value="Change Flight Status" />
+        </form></td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>
@@ -87,8 +93,8 @@
     <th>Arrival Date </th>
     <th>Arrival Time </th>
     <th>Flight Status</th>
-    <th>Price</th>
-    <th>Buy</th>
+    <th>Customers </th>
+    <th>Change Flight Status</th>
 
 
     {% for line in searched_flights_2 %}
@@ -102,8 +108,12 @@
         <td>{{line['arrival_date']}}</td>
         <td>{{line['arrival_time']}}</td>
         <td>{{line['flight_status']}}</td>
-        <td>{{line['base_price']}}</td>
-        <td><a href="/buy">Purchase flight</a></td>
+        <td><a href="/view_customers">View Customers</a></td>
+        {% if(line['edit']) %}
+        <td>  <form  action="/change_flight_status">
+          <input type="submit" value="Change Flight Status" />
+          </form></td>
+        {% endif %}
     </tr>
     {% endfor %}
   </table>
@@ -126,6 +136,7 @@
       <th>Arrival Date </th>
       <th>Arrival Time </th>
       <th>Flight Status</th>
+      <th>Customers </th>
       <th>Change Flight Status</th>
 
 
@@ -140,7 +151,12 @@
         <td>{{line['arrival_date']}}</td>
         <td>{{line['arrival_time']}}</td>
         <td>{{line['flight_status']}}</td>
-        <td><a href="/change_flight_status">Change Flight Status</a></td>
+        <td><a href="/view_customers">View Customers</a></td>
+        {% if(line['edit']) %}
+        <td>  <form  action="/change_flight_status">
+          <input type="submit" value="Change Flight Status" />
+          </form></td>
+        {% endif %}
       </tr>
       {% endfor %}
     </table>
@@ -156,6 +172,7 @@
       <th>Arrival Date </th>
       <th>Arrival Time </th>
       <th>Flight Status</th>
+      <th>Customers </th>
       <th>Change Flight Status</th>
 
     {% for line in previous_flights %}
@@ -169,11 +186,32 @@
         <td>{{line['arrival_date']}}</td>
         <td>{{line['arrival_time']}}</td>
         <td>{{line['flight_status']}}</td>
-        <td><a href="/change_flight_status">Change Flight Status</a></td>
+        <td><a href="/view_customers">View Customers</a></td>
+        {% if(line['edit']) %}
+        <td>  <form  action="/change_flight_status">
+          <input type="submit" value="Change Flight Status" />
+          </form></td>
+        {% endif %}
       </tr>
       {% endfor %}
     </table>
-
+  
+  <h2>Create a New Flight</h2>
+  <form  action="/new_flight" method="GET">
+  <input type="submit" value="Create a New Flight" />
+  </form>
+  <h2>Add a New Airport</h2>
+  <form  action="/new_airport" method="GET">
+  <input type="submit" value="Add a New Airport" />
+  </form>
+  <h2>Add a New Airplane</h2>
+  <form  action="/new_airplane" method="GET">
+  <input type="submit" value="Add a New Airplane" />
+  </form>
+  <h2>View Earned Revenue</h2>
+  <form  action="/earned_revenue" method="GET">
+  <input type="submit" value="View Earned Revenue" />
+  </form>
 </body>
 
 

@@ -1,0 +1,47 @@
+<html>
+
+<head>
+</head>
+
+<body>
+<h1>View Earned Revenue</h1>
+<h2>Total Revenue Earned Last Month</h2>
+<style type="text/css">
+  table,
+  th,
+  td {
+    border: 1px solid black;
+  }
+</style>
+<table>
+    <th>Total Revenue Last Month</th>
+
+  {% for line in last_month %}
+  <tr>
+      <td>{{line['SUM(sold_price)']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+<h2>Total Revenue Earned Last Year</h2>
+<style type="text/css">
+  table,
+  th,
+  td {
+    border: 1px solid black;
+  }
+</style>
+<table>
+    <th>Total Revenue Last Year</th>
+
+  {% for line in last_year %}
+  <tr>
+      <td>{{line['SUM(sold_price)']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+<form action="/staff_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+</body>
+
+</html>

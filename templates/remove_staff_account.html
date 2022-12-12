@@ -11,8 +11,11 @@
 </form>
 <form  action="/staff_delete_account" method="post">
 <input type="submit" value="Yes, delete my account!" />
-</form>
 
+</form>
+{% if error %}
+  <p class="error"><strong>Error:</strong> {{error}}</p>
+{% endif %}
 </body>
 
 

@@ -85,6 +85,70 @@ def remove_staff_account():
 @app.route('/track_spending')
 def track_spending():
     return render_template('track_spending.html')
+    
+@app.route('/earned_revenue')
+def earned_revenue():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT SUM(sold_price) FROM Ticket WHERE airline_name = %s AND purchase_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH);'
+    cursor.execute(query, (airline_name))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT SUM(sold_price) FROM Ticket WHERE airline_name = %s AND purchase_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR);'
+    cursor.execute(query, (airline_name))
+    #stores the results in a variable
+    data1 = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    return render_template('earned_revenue.html', username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights, last_month = data, last_year = data1)
+
+@app.route('/new_flight')
+def new_flight():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT ID, number_of_seats, manufacturer, age FROM Airplane WHERE airline_name = %s'
+    cursor.execute(query, (airline_name))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    return render_template('new_flight.html', username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights)
+
+@app.route('/new_airport')
+def new_airport():
+    return render_template('new_airport.html')
+
+@app.route('/new_airplane')
+def new_airplane():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT ID, number_of_seats, manufacturer, age FROM Airplane WHERE airline_name = %s'
+    cursor.execute(query, (airline_name))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    return render_template('new_airplane.html', username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights, airplane = data)
 
 #Define route for customer login
 @app.route('/customer_login')
@@ -116,6 +180,11 @@ def buy():
     session['searched_flights_1'] = searched_flights_1
     session['searched_flights_2'] = searched_flights_2
     return render_template('buy.html')
+    
+#Define route for register
+@app.route('/view_customers')
+def view_customers():
+    return render_template('view_customers.html')
 
 #Authenticates the customer login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -156,31 +225,18 @@ def loginAuth():
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 44abef6fa9a36b9af245fff510748b6541f1621c
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
             today = date.today()
             if((each['departure_date'] - today).days < 1):
                 each['cancel'] = False
             else:
                 each['cancel'] = True
-<<<<<<< HEAD
-=======
+                
             each['departure_date'] = str(each['departure_date'])
             each['departure_time'] = str(each['departure_time'])
             each['arrival_date'] = str(each['arrival_date'])
             each['arrival_time'] = str(each['arrival_time'])
-=======
-#        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-#            today = date.today()
-#            if((each['departure_date'] - today).days < 1):
-#                each['cancel'] = False
-#            else:
-#                each['cancel'] = True
->>>>>>> refs/remotes/origin/main
->>>>>>> 44abef6fa9a36b9af245fff510748b6541f1621c
+
         session['current_flights'] = current_flights
         print("current_flights: ", current_flights)
         cursor.close()
@@ -216,34 +272,42 @@ def staffLoginAuth():
         session['first_name'] = first_name
         session['airline_name'] = airline_name
         cursor = conn.cursor()
-        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE airline_name = %s AND departure_date < NOW()'
+        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Flight WHERE airline_name = %s AND departure_date < NOW()'
         cursor.execute(query, (airline_name))
         previous_flights = cursor.fetchall()
+        for each in previous_flights:
+            today = date.today()
+            if((each['departure_date'] - today).days < 0):
+                each['edit'] = False
+            else:
+                each['edit'] = True
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])
+            each['arrival_date'] = str(each['arrival_date'])
+            each['arrival_time'] = str(each['arrival_time'])
         session['previous_flights'] = previous_flights
-        print(previous_flights)
         cursor.close()
         """
         1. View flights: Defaults will be showing all the future flights operated by the airline he/she works for the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see all the customers of a particular flight.
 
         """
         cursor = conn.cursor()
-        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY);'
+        query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY);'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
 
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-<<<<<<< HEAD
-            each['edit'] = True
-
-=======
             today = date.today()
             if((each['departure_date'] - today).days < 0):
                 each['edit'] = False
             else:
                 each['edit'] = True
->>>>>>> refs/remotes/origin/main
+                
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])
+            each['arrival_date'] = str(each['arrival_date'])
+            each['arrival_time'] = str(each['arrival_time'])
         session['current_flights'] = current_flights
-        print(current_flights)
         cursor.close()
         return render_template('home_staff.html', previous_flights=previous_flights, current_flights = current_flights)
     else:
@@ -329,6 +393,9 @@ def registerStaffAuth():
         ins = """INSERT INTO Airline_Staff_Email (username, email)VALUES
                 (%s, %s)"""
         cursor.execute(ins, (username, email))
+        ins = """INSERT INTO Work_For (airline_name, username)VALUES
+                (%s, %s)"""
+        cursor.execute(ins, (airline_name, username))
         if (phone_number != ""):
             ins = """INSERT INTO Airline_Staff_Phone_Number (username, phone_number)VALUES
                 (%s, %s)"""
@@ -420,7 +487,27 @@ def search_staff():
     # print(data)
     data_return = search_flights(arrival_airport, departure_airport, arrival_city, departure_city, return_date)
     if data:
-        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data)
+        for each in data: # check if departure is a day or more. Do not give option to cancel if false
+            today = date.today()
+            if((each['departure_date'] - today).days < 0):
+                each['edit'] = False
+            else:
+                each['edit'] = True
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])
+            each['arrival_date'] = str(each['arrival_date'])
+            each['arrival_time'] = str(each['arrival_time'])
+        for each in data_return: # check if departure is a day or more. Do not give option to cancel if false
+            today = date.today()
+            if((each['departure_date'] - today).days < 0):
+                each['edit'] = False
+            else:
+                each['edit'] = True
+            each['departure_date'] = str(each['departure_date'])
+            each['departure_time'] = str(each['departure_time'])
+            each['arrival_date'] = str(each['arrival_date'])
+            each['arrival_time'] = str(each['arrival_time'])
+        return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, searched_flights_1 = data, searched_flights_2 = data_return)
     else:
         error = "Search Error"
         return render_template('home_staff.html', username = username, previous_flights = previous_flights, current_flights = current_flights, error = error)
@@ -493,13 +580,17 @@ def staff_delete_account():
     try:
         username = session['username']
         cursor = conn.cursor();
+        delete_query = "DELETE FROM Airline_Staff_Email WHERE username=%s;"
+        cursor.execute(delete_query, username)
+        delete_query = "DELETE FROM Airline_Staff_Phone_Number WHERE username=%s;"
+        cursor.execute(delete_query, username)
         delete_query = "DELETE FROM Airline_Staff WHERE username=%s;"
         cursor.execute(delete_query, username)
         conn.commit()
         cursor.close()
         return redirect('/home_unlog')
     except:
-        return render_template('remove_account.html', error="There was a problem with deleting your account")
+        return render_template('remove_staff_account.html', error="There was a problem with deleting your account")
 
 @app.route('/customer_back', methods=['GET','POST'])
 def customer_back():
@@ -580,6 +671,200 @@ def cancel_flight():
         error = "Flight not found"
         return render_template('cancel.html', error = error)
 
+@app.route('/see_flight_customers', methods = ['GET', 'POST'])
+def see_flight_customers():
+    username = session['username']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    airline_name = request.form['airline_name']
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT first_name, last_name FROM Ticket NATURAL JOIN Customer WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (airline_name, flight_number, departure_date, departure_time))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if (data):
+        print(data)
+        return render_template('view_customers.html', username = username, previous_flights = previous_flights, current_flights = current_flights, customers = data)
+    else:
+        #If the previous query doesn't return data, then throw error
+        error = "This flight does not exist or has no customers"
+        return render_template('view_customers.html', error = error)
+
+@app.route('/add_new_airplane', methods = ['GET', 'POST'])
+def add_new_airplane():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    ID = request.form['ID']
+    number_of_seats = request.form['number_of_seats']
+    manufacturer = request.form['manufacturer']
+    age = request.form['age']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT airline_name, username FROM Work_For WHERE airline_name = %s AND username = %s'
+    cursor.execute(query, (airline_name, username))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if (data):
+        #cursor used to send queries
+        cursor = conn.cursor()
+        #executes query
+        query = 'SELECT ID, number_of_seats, manufacturer, age FROM Airplane WHERE airline_name = %s AND ID = %s'
+        cursor.execute(query, (airline_name, ID))
+        #stores the results in a variable
+        data1 = cursor.fetchall()
+        #use fetchall() if you are expecting more than 1 data row
+        cursor.close()
+        error = None
+        if (data1):
+            error = "This airplane already exists"
+            return render_template('new_airplane.html', error = error)
+        else:
+            cursor = conn.cursor();
+            ins = """INSERT INTO Airplane (airline_name, ID, number_of_seats, manufacturer, age) VALUES
+                                (%s, %s, %s, %s, %s)"""
+            cursor.execute(ins, (airline_name, ID, number_of_seats, manufacturer, age))
+            conn.commit()
+            cursor.close()
+            return render_template('new_airplane.html', username = username, previous_flights = previous_flights, current_flights = current_flights, customers = data ,success = "Your new airplane has successfully been added!")
+    else:
+        error = "YOU ARE UNAUTHORIZED TO MAKE THIS ADDITION"
+        return render_template('new_airplane.html', error = error)
+
+@app.route('/add_new_airport', methods = ['GET', 'POST'])
+def add_new_airport():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    name = request.form['airport_name']
+    city = request.form['airport_city']
+    country = request.form['country']
+    airport_type = request.form['airport_type']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT airline_name, username FROM Work_For WHERE airline_name = %s AND username = %s'
+    cursor.execute(query, (airline_name, username))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if (data):
+        cursor = conn.cursor();
+        query = 'SELECT * FROM Airport WHERE name = %s AND city = %s AND country = %s'
+        cursor.execute(query, (name, city, country))
+        data1 = cursor.fetchone()
+        cursor.close()
+        error = None
+        if (data1):
+            error = "This airport already exists"
+            return render_template('new_airport.html', error = error)
+        else:
+            cursor = conn.cursor();
+            ins = """INSERT INTO Airport (name, city, country, airport_type) VALUES
+                                (%s, %s, %s, %s)"""
+            cursor.execute(ins, (name, city, country, airport_type))
+            conn.commit()
+            cursor.close()
+            return render_template('new_airport.html', success = "Your new airport has successfully been added!")
+    else:
+        error = "YOU ARE UNAUTHORIZED TO MAKE THIS ADDITION"
+        return render_template('new_airport.html', error = error)
+    
+@app.route('/create_new_flight', methods = ['GET', 'POST'])
+def create_new_flight():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    flight_number = request.form['flight_number']
+    departure_airport = request.form['departure_airport']
+    departure_city = request.form['departure_city']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    arrival_airport = request.form['arrival_airport']
+    arrival_city = request.form['arrival_city']
+    arrival_date = request.form['arrival_date']
+    arrival_time = request.form['arrival_time']
+    base_price = request.form['base_price']
+    airplane_id = request.form['airplane_id']
+    flight_status = request.form['flight_status']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT airline_name, username FROM Work_For WHERE airline_name = %s AND username = %s'
+    cursor.execute(query, (airline_name, username))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if (data):
+        cursor = conn.cursor();
+        query = 'SELECT airline_name, ID FROM Airplane WHERE airline_name = %s AND ID = %s'
+        cursor.execute(query, (airline_name, airplane_id))
+        data1 = cursor.fetchone()
+        cursor.close()
+        error = None
+        if (data1):
+            cursor = conn.cursor();
+            query = 'SELECT name, city FROM Airport WHERE name = %s AND city = %s'
+            cursor.execute(query, (departure_airport, departure_city))
+            data2 = cursor.fetchone()
+            cursor.close()
+            error = None
+            if (data2):
+                cursor = conn.cursor();
+                query = 'SELECT name, city FROM Airport WHERE name = %s AND city = %s'
+                cursor.execute(query, (arrival_airport, arrival_city))
+                data3 = cursor.fetchone()
+                cursor.close()
+                error = None
+                if (data3):
+                    cursor = conn.cursor();
+                    ins = """INSERT INTO Flight (airline_name, flight_number, departure_airport, departure_city, departure_date, departure_time, arrival_airport, arrival_city, arrival_date, arrival_time, base_price, airplane_id, flight_status) VALUES
+                                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                    cursor.execute(ins, (airline_name, flight_number, departure_airport, departure_city, departure_date, departure_time, arrival_airport, arrival_city, arrival_date, arrival_time, base_price, airplane_id, flight_status))
+                    conn.commit()
+                    cursor.close()
+                    cursor = conn.cursor()
+                    query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY)'
+                    cursor.execute(query, (airline_name))
+                    current_flights = cursor.fetchall()
+    
+                    for each in current_flights:
+                        each['edit'] = True
+                    session['current_flights'] = current_flights
+                    print(current_flights)
+                    cursor.close()
+                    return render_template('new_flight.html',  username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights ,success = "Your new flight has successfully been created!")
+                else:
+                    error = "The arrival airport or city does not exist"
+                    return render_template('new_flight.html', error = error)
+            else:
+                error = "The departure airport or city does not exist"
+                return render_template('new_flight.html', error = error)
+        else:
+            error = "The airplane does not exist"
+            return render_template('new_flight.html', error = error)
+        
+    else:
+        error = "YOU ARE UNAUTHORIZED TO MAKE THIS ADDITION"
+        return render_template('new_flight.html', error = error)
+    
+
 @app.route('/edit_flight_status', methods = ['GET', 'POST'])
 def edit_flight_status():
     username = session['username']
@@ -607,8 +892,8 @@ def edit_flight_status():
         query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY)'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
-
-        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
+    
+        for each in current_flights:
             each['edit'] = True
         session['current_flights'] = current_flights
         print(current_flights)
@@ -619,7 +904,7 @@ def edit_flight_status():
         return render_template('change_flight_status.html', error = error)
     else:
         #If the previous query doesn't return data, then throw error
-        error = "This flight does not exit"
+        error = "This flight does not exist"
         return render_template('change_flight_status.html', error = error)
 
 @app.route('/logout')

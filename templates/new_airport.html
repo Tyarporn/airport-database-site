@@ -1,0 +1,28 @@
+<html>
+
+<head>
+</head>
+
+<body>
+<h1>Add a New Airport</h1>
+<h2>Please input the details of the flight you would like to create:</h2>
+<form action="/add_new_airport" method="POST">
+    <input type="text" name = "airport_name" placeholder="Airport Name" required/>
+    <input type="text" name = "airport_city" placeholder="Airport City" required/>
+    <input type="text" name = "country" placeholder="Airport Country" required/>
+    <input type="text" name = "airport_type" placeholder="Airport Type: domestic/international/both" required/>
+    <br>
+    <input type="submit" value = Add Airport />
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+    {% if success %}
+      <p class="success"><strong>Status:</strong> {{success}}</p>
+    {% endif %}
+</form>
+<form action="/staff_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+</body>
+
+</html>
