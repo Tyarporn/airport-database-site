@@ -155,10 +155,6 @@ def loginAuth():
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> refs/remotes/origin/main
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
             today = date.today()
             if((each['departure_date'] - today).days < 1):
@@ -169,17 +165,7 @@ def loginAuth():
             each['departure_time'] = str(each['departure_time'])
             each['arrival_date'] = str(each['arrival_date'])
             each['arrival_time'] = str(each['arrival_time'])
-<<<<<<< HEAD
-=======
-=======
-#        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-#            today = date.today()
-#            if((each['departure_date'] - today).days < 1):
-#                each['cancel'] = False
-#            else:
-#                each['cancel'] = True
->>>>>>> 44abef6fa9a36b9af245fff510748b6541f1621c
->>>>>>> refs/remotes/origin/main
+
         session['current_flights'] = current_flights
         print("current_flights: ", current_flights)
         cursor.close()
@@ -500,14 +486,17 @@ def customer_back():
     first_name = session['first_name']
     email = session['email']
     cursor = conn.cursor()
-    query = 'SELECT airline_name, flight_number, departure_date FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date < CURRENT_DATE()'
+    query = 'SELECT airline_name, flight_number, departure_date, departure_time FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date < CURRENT_DATE()'
     cursor.execute(query, (email))
     previous_flights = cursor.fetchall()
     session['previous_flights'] = previous_flights
+    for each in previous_flights:
+        each['departure_date'] = str(each['departure_date'])
+        each['departure_time'] = str(each['departure_time'])
     cursor.close()
 
     cursor = conn.cursor()
-    query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date >= CURRENT_DATE()'
+    query = 'SELECT airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Ticket NATURAL JOIN Flight WHERE email = %s and departure_date >= CURRENT_DATE()'
     cursor.execute(query, (email))
     current_flights = cursor.fetchall()
     for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
@@ -516,6 +505,11 @@ def customer_back():
             each['cancel'] = False
         else:
             each['cancel'] = True
+        each['departure_date'] = str(each['departure_date'])
+        each['departure_time'] = str(each['departure_time'])
+        each['arrival_date'] = str(each['arrival_date'])
+        each['arrival_time'] = str(each['arrival_time'])
+
     session['current_flights'] = current_flights
     cursor.close()
 
@@ -637,6 +631,7 @@ def buy_ticket():
     except:
         error = "There was an error processing your request"
         return render_template('buy.html', error =error)
+
 @app.route('/cancel_flight', methods = ['GET', 'POST'])
 def cancel_flight():
     ticket_ID = request.form['ticket_ID']
@@ -705,6 +700,10 @@ def edit_flight_status():
         #If the previous query doesn't return data, then throw error
         error = "This flight does not exit"
         return render_template('change_flight_status.html', error = error)
+
+@app.route('/view_reports', methods=['GET', 'POST'])
+def view_reports():
+    return
 
 @app.route('/logout')
 def logout():
