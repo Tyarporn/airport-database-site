@@ -73,6 +73,7 @@ def change_flight_status():
 
 @app.route('/logged_out')
 def logged_out():
+    session.clear()
     return render_template('logged_out.html')
 
 @app.route('/remove_account')
@@ -86,7 +87,7 @@ def remove_staff_account():
 @app.route('/track_spending')
 def track_spending():
     return render_template('track_spending.html')
-    
+
 @app.route('/earned_revenue')
 def earned_revenue():
     username = session['username']
@@ -179,11 +180,15 @@ def register():
 @app.route('/buy', methods=['GET', 'POST'])
 def buy():
     return render_template('buy.html')
-    
+
 #Define route for register
 @app.route('/view_customers')
 def view_customers():
     return render_template('view_customers.html')
+
+@app.route('/view_ticket_reports')
+def view_ticket_reports():
+    return render_template('view_ticket_reports.html')
 
 #Authenticates the customer login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -230,7 +235,7 @@ def loginAuth():
                 each['cancel'] = False
             else:
                 each['cancel'] = True
-                
+
             each['departure_date'] = str(each['departure_date'])
             each['departure_time'] = str(each['departure_time'])
             each['arrival_date'] = str(each['arrival_date'])
@@ -301,7 +306,7 @@ def staffLoginAuth():
                 each['edit'] = False
             else:
                 each['edit'] = True
-                
+
             each['departure_date'] = str(each['departure_date'])
             each['departure_time'] = str(each['departure_time'])
             each['arrival_date'] = str(each['arrival_date'])
@@ -881,7 +886,7 @@ def add_new_airport():
     else:
         error = "YOU ARE UNAUTHORIZED TO MAKE THIS ADDITION"
         return render_template('new_airport.html', error = error)
-    
+
 @app.route('/create_new_flight', methods = ['GET', 'POST'])
 def create_new_flight():
     username = session['username']
@@ -941,7 +946,7 @@ def create_new_flight():
                     query = 'SELECT departure_airport, arrival_airport, airline_name, flight_number, departure_date, departure_time, arrival_date, arrival_time, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY)'
                     cursor.execute(query, (airline_name))
                     current_flights = cursor.fetchall()
-    
+
                     for each in current_flights:
                         each['edit'] = True
                     session['current_flights'] = current_flights
@@ -957,11 +962,11 @@ def create_new_flight():
         else:
             error = "The airplane does not exist"
             return render_template('new_flight.html', error = error)
-        
+
     else:
         error = "YOU ARE UNAUTHORIZED TO MAKE THIS ADDITION"
         return render_template('new_flight.html', error = error)
-    
+
 
 @app.route('/edit_flight_status', methods = ['GET', 'POST'])
 def edit_flight_status():
@@ -990,7 +995,7 @@ def edit_flight_status():
         query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE  airline_name = %s AND departure_date >= NOW() AND departure_date <= DATE_ADD(NOW(), INTERVAL 30 DAY)'
         cursor.execute(query, (airline_name))
         current_flights = cursor.fetchall()
-    
+
         for each in current_flights:
             each['edit'] = True
         session['current_flights'] = current_flights
@@ -1005,9 +1010,37 @@ def edit_flight_status():
         error = "This flight does not exist"
         return render_template('change_flight_status.html', error = error)
 
-@app.route('/view_reports', methods=['GET', 'POST'])
+@app.route('/view_reports', methods = ['GET', 'POST'])
 def view_reports():
-    return
+    date_1 = request.form['date_1']
+    date_2 = request.form['date_2']
+    try:
+        cursor = conn.cursor()
+        query = 'SELECT ticket_ID, purchase_date, sold_price from Ticket WHERE purchase_date >= %s and purchase_date <= %s order by purchase_date'
+        cursor.execute(query, (date_1, date_2))
+        tickets = cursor.fetchall()
+        print(tickets)
+        cursor.close()
+
+        cursor = conn.cursor()
+        sum_query = 'SELECT sum(sold_price) from Ticket WHERE purchase_date >= %s and purchase_date <= %s order by purchase_date'
+        cursor.execute(sum_query, (date_1, date_2))
+        sum = cursor.fetchone()
+        total = sum['sum(sold_price)']
+        cursor.close()
+
+        cursor = conn.cursor()
+        count_query = 'SELECT count(sold_price) from Ticket WHERE purchase_date >= %s and purchase_date <= %s order by purchase_date'
+        cursor.execute(count_query, (date_1, date_2))
+        count_raw = cursor.fetchone()
+        count = count_raw['count(sold_price)']
+        cursor.close()
+
+        return render_template('view_ticket_reports.html', tickets = tickets, total = total, count = count)
+    except:
+        error = "There was something wrong with your query"
+        return render_template('view_ticket_reports.html', error=error)
+
 
 @app.route('/logout')
 def logout():

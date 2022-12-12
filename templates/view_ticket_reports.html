@@ -1,0 +1,48 @@
+<html>
+
+<head>
+</head>
+
+<body>
+<h1>View Ticket Reports</h1>
+<h2>Please input the range of dates that you would like to see ticket results for:</h2>
+<form action="/view_reports" method="POST">
+    <input type="date" name = "date_1" placeholder="From" required/>
+    <input type="date" name = "date_2" placeholder="To" required/>
+    <br>
+    <input type="submit" value = "View Ticket Report" />
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+</form>
+
+<style type="text/css">
+    table,
+    th,
+    td {
+        border: 1px solid black;
+    }
+</style>
+<h2>List of tickets sold in this range</h2>
+<table>
+    <th>Ticket_ID</th>
+    <th>Date</th>
+    <th>Price</th>
+
+  {% for line in tickets %}
+  <tr>
+      <td>{{line['ticket_ID']}}</td>
+      <td>{{line['purchase_date']}}</td>
+      <td>{{line['sold_price']}}</td>
+    </tr>
+  {% endfor %}
+  </table>
+
+<p>Total for this range is {{total}}</p>
+<p>Total tickets sold is {{count}}</p>
+  <form action="/staff_back" method="post">
+    <input type="submit" value = "Go Back" />
+  </form>
+</body>
+
+</html>
