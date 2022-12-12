@@ -10,7 +10,7 @@
   <input type="text" name= "ticket_ID" placeholder="Ticket ID" />
   <input type="text" name="flight_number" placeholder="Flight Number"/>
   <br>
-  <input type="submit" value="Cancel this flight">
+  <input type="submit" value="Cancel this flight" onclick="return confirm('Are you sure?')" />
 </form>
 
 <form action="/customer_back" method="post">
