@@ -1,0 +1,51 @@
+<html>
+
+<head>
+</head>
+
+<body>
+<h1>Add a New Airplane</h1>
+<h2>Please input the details of the Airplane you would like to add:</h2>
+<form action="/add_new_airplane" method="POST">
+    <input type="text" name = "ID" placeholder="Airplane ID" required/>
+    <input type="text" name = "number_of_seats" placeholder="Number of Seats on Aircraft" required/>
+    <input type="text" name = "manufacturer" placeholder="Airplane Manufacturer" required/>
+    <input type="number" name = "age" placeholder="Age of Aircraft" required/>
+    <br>
+    <input type="submit" value = Add Airplane />
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+    {% if success %}
+      <p class="success"><strong>Status:</strong> {{success}}</p>
+    {% endif %}
+</form>
+<form action="/staff_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+<style type="text/css">
+    table,
+    th,
+    td {
+        border: 1px solid black;
+    }
+</style>
+<h2>List of Airplanes owned by Airline</h2>
+<table>
+    <th>Airplane ID</th>
+    <th>Number of Seats</th>
+    <th>Manufacturer</th>
+    <th>Age</th>
+    
+  {% for line in airplane %}
+  <tr>
+      <td>{{line['ID']}}</td>
+      <td>{{line['number_of_seats']}}</td>
+      <td>{{line['manufacturer']}}</td>
+      <td>{{line['age']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+
+</html>
