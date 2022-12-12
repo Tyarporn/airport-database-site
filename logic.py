@@ -10,22 +10,22 @@ import json
 app = Flask(__name__)
 
 #Configure MySQL
-# conn = pymysql.connect(host='localhost',
-#                          user='root',
-#                          password='',
-#                          db='air_ticket_reservation_system',
-#                          charset='utf8mb4',
-#                          cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(host='localhost',
+                          user='root',
+                          password='',
+                          db='air_ticket_reservation_system',
+                          charset='utf8mb4',
+                          cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
 
-conn = pymysql.connect(host='localhost',
-                      user='root',
-                      password='root',
-                      port= 8889,
-                      db='air_ticket_reservation_system',
-                      charset='utf8mb4',
-                      cursorclass=pymysql.cursors.DictCursor)
+#conn = pymysql.connect(host='localhost',
+#                      user='root',
+#                      password='root',
+#                      port= 8889,
+#                      db='air_ticket_reservation_system',
+#                      charset='utf8mb4',
+#                      cursorclass=pymysql.cursors.DictCursor)
 
 
 def search_flights(departure_airport,arrival_airport, departure_city, arrival_city, departure_date):
@@ -87,6 +87,28 @@ def remove_staff_account():
 def track_spending():
     return render_template('track_spending.html')
     
+@app.route('/flight_ratings')
+def flight_ratings():
+    return render_template('flight_ratings.html')
+    
+@app.route('/frequent_customers')
+def frequent_customers():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT first_name, last_name FROM Ticket NATURAL JOIN Customer WHERE airline_name = %s AND departure_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR) GROUP BY email ORDER BY COUNT(email) DESC LIMIT 1'
+    cursor.execute(query, (airline_name))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    session['most_frequent'] = data
+    return render_template('frequent_customers.html',username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights, most_frequent = data)
+    
 @app.route('/earned_revenue')
 def earned_revenue():
     username = session['username']
@@ -119,15 +141,6 @@ def new_flight():
     airline_name = session['airline_name']
     previous_flights = session['previous_flights']
     current_flights = session['current_flights']
-    #cursor used to send queries
-    cursor = conn.cursor()
-    #executes query
-    query = 'SELECT ID, number_of_seats, manufacturer, age FROM Airplane WHERE airline_name = %s'
-    cursor.execute(query, (airline_name))
-    #stores the results in a variable
-    data = cursor.fetchall()
-    #use fetchall() if you are expecting more than 1 data row
-    cursor.close()
     return render_template('new_flight.html', username = username, airline_name = airline_name, previous_flights = previous_flights, current_flights = current_flights)
 
 @app.route('/new_airport')
@@ -759,6 +772,67 @@ def cancel_flight():
     else:
         error = "Flight not found"
         return render_template('cancel.html', error = error)
+
+@app.route('/see_flight_ratings', methods = ['GET', 'POST'])
+def see_flight_ratings():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT AVG(stars) FROM Rates WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+    cursor.execute(query, (flight_number, departure_date, departure_time, airline_name))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT stars, comments FROM Rates WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+    cursor.execute(query, (flight_number, departure_date, departure_time, airline_name))
+    #stores the results in a variable
+    data1 = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if (data):
+        return render_template('flight_ratings.html', username = username, previous_flights = previous_flights, current_flights = current_flights, avg_rating = data, ratings = data1)
+    else:
+        #If the previous query doesn't return data, then throw error
+        error = "This flight does not exist or has no customers"
+        return render_template('flight_ratings.html', error = error)
+
+@app.route('/see_frequent_customers', methods = ['GET', 'POST'])
+def see_frequent_customers():
+    username = session['username']
+    airline_name = session['airline_name']
+    previous_flights = session['previous_flights']
+    current_flights = session['current_flights']
+    most_frequent = session['most_frequent']
+    email = request.form['email']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT first_name, last_name, airline_name, flight_number, departure_date, departure_time FROM Ticket NATURAL JOIN Customer WHERE airline_name = %s AND email = %s'
+    cursor.execute(query, (airline_name, email))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if (data):
+        print(data)
+        return render_template('frequent_customers.html', username = username, previous_flights = previous_flights, current_flights = current_flights, most_frequent = most_frequent, flights = data)
+    else:
+        #If the previous query doesn't return data, then throw error
+        error = "This flight does not exist or has no customers"
+        return render_template('view_customers.html', error = error)
 
 @app.route('/see_flight_customers', methods = ['GET', 'POST'])
 def see_flight_customers():
