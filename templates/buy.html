@@ -5,9 +5,49 @@
 
 <body>
 <h1> Buy a Ticket </h1>
+<h2> Input the information for the airplane ticket </h2>
+
+<form action="/buy_ticket" method="POST">
+  <!-- <input type="text" name= "ticket_ID" placeholder="Ticket ID" /> -->
+  <input type="text" name="flight_number" placeholder="Flight Number"/><br>
+
+  <label for="departure_date">Departure Date</label>
+  <input type="date" name= "departure_date" placeholder="Departure Date" />
+  <input type="time" name="departure_time" placeholder="Departure Time"/>
+  <input type="text" name= "departure_airport" placeholder="Departure Airport" /><br>
+
+  <label for="arrival_date">Arrival date and time</label>
+  <input type="date" name= "arrival_date" placeholder="Arrival Date" />
+  <input type="time" name="arrival_time" placeholder="Arrival Time"/>
+  <input type="text" name= "arrival_airport" placeholder="Arrival Airport" /><br>
 
 
-<a href="/">Go back</a>
+  <p>Please input your card information </p>
+  <label for="card_type">Card Type: </label>
+  <input list="card_type" name="card_type">
+  <datalist id="card_type">
+    <option value="credit">
+    <option value="debit">
+  </datalist>
+  <input type="text" name= "card_number" placeholder="Card Number" /> <br>
+  <input type="text" name= "first_name" placeholder="Card Holder First Name" />
+  <input type="text" name= "last_name" placeholder="Card Holder Last Name" /><br>
+  <input type="date" name="expiration_date" placeholder="Expiration Date"/><br>
+  <input type="text" name= "security_code" maxlength=3 placeholder="csc"/>
+  <br>
+  <input type="submit" value="Buy this flight">
+</form>
+
+<form action="/customer_back" method="post">
+  <input type="submit" value = "Go Back" />
+</form>
+
+{% if error %}
+  <p class="error"><strong>Error:</strong> {{error}}</p>
+{% endif %}
+{% if price %}
+  <p class="success"><strong>Success! Bought ticket for {{flight_number}} for: {{price}} Dollars</strong>
+{% endif %}
 
 </body>
 

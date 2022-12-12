@@ -125,9 +125,9 @@
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
-    <!-- <th>Depart Time </th> -->
+    <th>Depart Time </th>
     <th>Arrival Date </th>
-    <!-- <th>Arrival Time </th> -->
+    <th>Arrival Time </th>
     <th>Flight Status</th>
     <th>Cancel</th>
 
@@ -137,9 +137,9 @@
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
-      <!-- <td>{{line['departure_time']}}</td> -->
+      <td>{{line['departure_time']}}</td>
       <td>{{line['arrival_date']}}</td>
-      <!-- <td>{{line['arrival_time']}}</td> -->
+      <td>{{line['arrival_time']}}</td>
       <td>{{line['flight_status']}}</td>
 
       {% if(line['cancel']) %}
@@ -156,7 +156,7 @@
     <th>Airline</th>
     <th>Flight Number</th>
     <th>Depart Date</th>
-    <!-- <th>Depart Time </th> -->
+    <th>Depart Time </th>
     <th>Review</th>
 
     {% for line in previous_flights %}
@@ -164,7 +164,7 @@
       <td>{{line['airline_name']}}</td>
       <td>{{line['flight_number']}}</td>
       <td>{{line['departure_date']}}</td>
-      <!-- <td>{{line['departure_time']}}</td> -->
+      <td>{{line['departure_time']}}</td>
       <td>  <form  action="/review" method="GET">
         <input type="submit" value="Leave a review" />
         </form></td>

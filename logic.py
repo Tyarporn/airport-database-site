@@ -3,28 +3,29 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 from datetime import date, datetime
+import random
 import json
 
 #Initialize the app from Flask
 app = Flask(__name__)
 
 #Configure MySQL
-conn = pymysql.connect(host='localhost',
-                         user='root',
-                         password='',
-                         db='air_ticket_reservation_system',
-                         charset='utf8mb4',
-                         cursorclass=pymysql.cursors.DictCursor)
+# conn = pymysql.connect(host='localhost',
+#                          user='root',
+#                          password='',
+#                          db='air_ticket_reservation_system',
+#                          charset='utf8mb4',
+#                          cursorclass=pymysql.cursors.DictCursor)
 
 # Configure MySQL
 
-#conn = pymysql.connect(host='localhost',
-#                       user='root',
-#                       password='root',
-#                       port= 8889,
-#                       db='air_ticket_reservation_system',
-#                       charset='utf8mb4',
-#                       cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(host='localhost',
+                      user='root',
+                      password='root',
+                      port= 8889,
+                      db='air_ticket_reservation_system',
+                      charset='utf8mb4',
+                      cursorclass=pymysql.cursors.DictCursor)
 
 
 def search_flights(departure_airport,arrival_airport, departure_city, arrival_city, departure_date):
@@ -113,8 +114,6 @@ def register():
 
 @app.route('/buy', methods=['GET', 'POST'])
 def buy():
-    session['searched_flights_1'] = searched_flights_1
-    session['searched_flights_2'] = searched_flights_2
     return render_template('buy.html')
 
 #Authenticates the customer login
@@ -148,7 +147,7 @@ def loginAuth():
         session['previous_flights'] = previous_flights
         for each in previous_flights:
             each['departure_date'] = str(each['departure_date'])
-            each['departure_time'] = str(each['departure_time'])       
+            each['departure_time'] = str(each['departure_time'])
         cursor.close()
 
         cursor = conn.cursor()
@@ -156,7 +155,6 @@ def loginAuth():
         cursor.execute(query, (email))
         current_flights = cursor.fetchall()
 
-<<<<<<< HEAD
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
             today = date.today()
             if((each['departure_date'] - today).days < 1):
@@ -167,14 +165,6 @@ def loginAuth():
             each['departure_time'] = str(each['departure_time'])
             each['arrival_date'] = str(each['arrival_date'])
             each['arrival_time'] = str(each['arrival_time'])
-=======
-#        for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-#            today = date.today()
-#            if((each['departure_date'] - today).days < 1):
-#                each['cancel'] = False
-#            else:
-#                each['cancel'] = True
->>>>>>> refs/remotes/origin/main
         session['current_flights'] = current_flights
         print("current_flights: ", current_flights)
         cursor.close()
@@ -226,16 +216,11 @@ def staffLoginAuth():
         current_flights = cursor.fetchall()
 
         for each in current_flights: # check if departure is a day or more. Do not give option to cancel if false
-<<<<<<< HEAD
-            each['edit'] = True
-
-=======
             today = date.today()
             if((each['departure_date'] - today).days < 0):
                 each['edit'] = False
             else:
                 each['edit'] = True
->>>>>>> refs/remotes/origin/main
         session['current_flights'] = current_flights
         print(current_flights)
         cursor.close()
@@ -388,8 +373,8 @@ def search_customer():
         each['arrival_date'] = str(each['arrival_date'])
         each['arrival_time'] = str(each['arrival_time'])
     print(data)
-    # session['searched_flights_1'] = data
-    # session['searched_flights_2'] = data_return
+    session['searched_flights_1'] = data
+    session['searched_flights_2'] = data_return
     if data:
         # for each in data:
         #     print(each['flight_number'])
@@ -547,6 +532,96 @@ def date_spending():
     sum = sum_res['sum(sold_price)']
     return render_template('track_spending.html', date_spending = data, sum = sum, t_sum = t_sum)
 
+@app.route('/buy_ticket', methods =['GET', 'POST'])
+def buy_ticket():
+    # print(session)
+    # get form VALUES
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    departure_airport = request.form['departure_airport']
+    arrival_date = request.form['arrival_date']
+    arrival_time = request.form['arrival_time']
+    arrival_airport = request.form['arrival_airport']
+    card_type = request.form['card_type']
+    card_number = request.form['card_number']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    expiration_date = request.form['expiration_date']
+    security_code = request.form['security_code']
+    email = session['email']
+    # generate new ticket ID
+    ticket_ID = random.randrange(100000,999999)
+
+
+    # check if credit card is in credit card. if not add to credit card
+    cursor = conn.cursor();
+    credit_query = 'SELECT * FROM Card WHERE card_number = %s AND email = %s AND expiration_date = %s AND card_type = %s'
+    cursor.execute(credit_query, (card_number, email, expiration_date, card_type))
+    card_data = cursor.fetchall()
+    cursor.close()
+
+    if not card_data: # card_data is empty
+        cursor = conn.cursor()
+        insert_query = """INSERT INTO Card (card_number, email, expiration_date, first_name, last_name, card_type)
+                        VALUES (%s,%s,%s,%s,%s,%s)"""
+        cursor.execute(insert_query, (card_number, email, expiration_date, first_name, last_name, card_type))
+        conn.commit()
+        cursor.close()
+
+    # find number of tickets on flight
+    try:
+        cursor = conn.cursor();
+        ticket_sum_query = 'SELECT COUNT(ticket_ID) FROM Ticket WHERE flight_number = %s and departure_date = %s and departure_time = %s;'
+        cursor.execute(ticket_sum_query, (flight_number, departure_date, departure_time))
+        ticket_count_data = cursor.fetchone()
+        ticket_count = ticket_count_data['COUNT(ticket_ID)']
+        cursor.close()
+
+    # find flight capacity
+        cursor = conn.cursor();
+        flight_query = 'SELECT * FROM Airplane inner join Flight on Airplane.ID = Flight.airplane_id WHERE flight_number = %s and departure_date = %s and departure_time = %s and departure_airport = %s and arrival_airport = %s;'
+        # print(flight_query%(flight_number, departure_date, departure_time, departure_airport, arrival_airport) )
+        cursor.execute(flight_query, (flight_number, departure_date, departure_time, departure_airport, arrival_airport))
+        flight_data = cursor.fetchone()
+        # print(flight_data)
+        cursor.close()
+
+    # calculate ticket price
+        capacity = flight_data['number_of_seats']
+        base_price = flight_data['base_price']
+        if(ticket_count > (capacity*.6)):
+            sold_price = base_price + (base_price * .25)
+        else:
+            sold_price = base_price
+
+    # get purchase date and time
+        today = date.today()
+        purchase_date = today.strftime("%Y-%m-%d")
+        now = datetime.now()
+        purchase_time = now.strftime("%H:%M:%S")
+
+    # add ticket to Ticket and purchased_buy
+        print(ticket_ID, flight_data['airline_name'], flight_number, sold_price, purchase_date, purchase_time, email)
+
+        cursor = conn.cursor();
+        ticket_insert = """INSERT INTO Ticket(ticket_ID, airline_name, flight_number, sold_price, purchase_date, purchase_time, departure_date, departure_time, email)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) """
+        cursor.execute(ticket_insert, (ticket_ID, flight_data['airline_name'], flight_number, sold_price, purchase_date, purchase_time, departure_date, departure_time, email))
+        conn.commit()
+        cursor.close()
+
+        cursor = conn.cursor();
+        purchase_insert = """INSERT INTO Purchased_With(ticket_ID, email, card_number, payment_date, payment_time)
+                            VALUES (%s, %s, %s, %s, %s)"""
+        cursor.execute(purchase_insert, (ticket_ID, email, card_number, purchase_date, purchase_time))
+        conn.commit()
+        cursor.close()
+
+        return render_template('buy.html', price = sold_price, flight_number = flight_number)
+    except:
+        error = "There was an error processing your request"
+        return render_template('buy.html', error =error)
 @app.route('/cancel_flight', methods = ['GET', 'POST'])
 def cancel_flight():
     ticket_ID = request.form['ticket_ID']
